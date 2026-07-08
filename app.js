@@ -27,6 +27,46 @@
     }
   }
 
+  // continuous theme interpolation: light -> dusk -> dark (no snapping)
+  const PAL = {
+    light: { base:[234,241,251,1], ink:[16,26,46,1], ink2:[70,83,110,1], ink3:[123,133,152,1],
+      card:[255,255,255,0.66], panel:[255,255,255,0.82], surface:[255,255,255,0.9], rim:[255,255,255,0.75],
+      border:[18,30,55,0.08], border2:[18,30,55,0.14], halo:[255,255,255,0.55], soft:[47,107,255,0.1],
+      veilRGB:[234,241,251], veilA:[0.28,0.34,0.86] },
+    dusk: { base:[38,49,76,1], ink:[234,241,252,1], ink2:[180,193,220,1], ink3:[128,142,176,1],
+      card:[255,255,255,0.08], panel:[30,40,66,0.58], surface:[255,255,255,0.11], rim:[255,255,255,0.16],
+      border:[255,255,255,0.12], border2:[255,255,255,0.2], halo:[18,26,50,0.5], soft:[120,160,255,0.18],
+      veilRGB:[38,49,76], veilA:[0.34,0.5,0.9] },
+    dark: { base:[5,7,15,1], ink:[238,243,252,1], ink2:[166,178,204,1], ink3:[106,117,144,1],
+      card:[255,255,255,0.05], panel:[16,24,44,0.62], surface:[255,255,255,0.06], rim:[255,255,255,0.12],
+      border:[255,255,255,0.09], border2:[255,255,255,0.16], halo:[0,0,0,0.5], soft:[91,147,255,0.16],
+      veilRGB:[5,7,15], veilA:[0.28,0.52,0.95] },
+  };
+  const KEYS = { base:"--base", ink:"--ink", ink2:"--ink-2", ink3:"--ink-3", card:"--card",
+    panel:"--panel", surface:"--surface", rim:"--rim", border:"--border", border2:"--border-2",
+    halo:"--halo", soft:"--accent-soft" };
+  const smooth = (t) => t * t * (3 - 2 * t);
+  const rgba = (c) => "rgba(" + Math.round(c[0]) + "," + Math.round(c[1]) + "," + Math.round(c[2]) + "," + (c[3]).toFixed(3) + ")";
+  function mix(a, b, t) { return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t, (a[3]!==undefined?a[3]:1)+((b[3]!==undefined?b[3]:1)-(a[3]!==undefined?a[3]:1))*t]; }
+  let lastTheme = -1;
+  function setTheme(p) {
+    let A, B, t;
+    if (p < 0.485) { A = PAL.light; B = PAL.dusk; t = smooth(Math.min(Math.max((p - 0.12) / 0.32, 0), 1)); }
+    else { A = PAL.dusk; B = PAL.dark; t = smooth(Math.min(Math.max((p - 0.50) / 0.24, 0), 1)); }
+    const key = (p < 0.485 ? 0 : 1) * 1000 + Math.round(t * 240);
+    if (key === lastTheme) return;
+    lastTheme = key;
+    const s = body.style;
+    for (const k in KEYS) s.setProperty(KEYS[k], rgba(mix(A[k], B[k], t)));
+    const vr = mix([...A.veilRGB, 1], [...B.veilRGB, 1], t);
+    const a0 = A.veilA[0] + (B.veilA[0] - A.veilA[0]) * t;
+    const a1 = A.veilA[1] + (B.veilA[1] - A.veilA[1]) * t;
+    const a2 = A.veilA[2] + (B.veilA[2] - A.veilA[2]) * t;
+    const R = Math.round(vr[0]), G = Math.round(vr[1]), Bl = Math.round(vr[2]);
+    s.setProperty("--veil", "linear-gradient(180deg, rgba(" + R + "," + G + "," + Bl + "," + a0.toFixed(3) +
+      ") 0%, rgba(" + R + "," + G + "," + Bl + "," + a1.toFixed(3) + ") 52%, rgba(" + R + "," + G + "," + Bl + "," + a2.toFixed(3) + ") 100%)");
+  }
+
   // motion blur that masks scrub stepping + the theme flip
   let lastY = window.scrollY;
   let curBlur = 0, targetBlur = 0, blurRaf = null;
@@ -48,9 +88,7 @@
       const t = p * (video.duration - 0.06);
       if (Math.abs(video.currentTime - t) > 0.04) { try { video.currentTime = t; } catch (e) {} }
     }
-    // two-stage theme: light -> dusk -> dark
-    body.classList.toggle("dusk", p >= 0.3 && p < 0.62);
-    body.classList.toggle("dark", p >= 0.62);
+    setTheme(p); // continuous light -> dusk -> dark
     if (nav) nav.classList.toggle("scrolled", y > 16);
 
     if (!reduce && video) {

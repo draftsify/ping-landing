@@ -30,7 +30,7 @@
   --radius: 18px;
   --maxw: 1180px;
   --f: "DM Sans", system-ui, -apple-system, sans-serif;
-  --tr: .6s cubic-bezier(.4,0,.2,1);
+  --tr: .16s linear;
 }
 
 /* stage 1 — dusk / upper atmosphere (twilight) */
