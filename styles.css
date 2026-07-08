@@ -98,7 +98,7 @@ section { max-width: var(--maxw); margin: 0 auto; padding: 64px 24px; position: 
   display: inline-flex; align-items: center; padding: 5px 13px; border-radius: 999px;
   background: var(--surface); border: 1px solid var(--accent-line); color: var(--ink);
   font-size: 12.5px; font-weight: 500; margin-bottom: 16px; backdrop-filter: blur(10px);
-  box-shadow: 0 2px 5px rgba(18,30,55,0.06), 0 8px 20px -12px rgba(47,107,255,0.4);
+  box-shadow: 0 2px 6px rgba(18,30,55,0.06);
   transition: background var(--tr), color var(--tr), border-color var(--tr);
 }
 .head { max-width: 620px; margin: 0 auto 42px; text-align: center; }
@@ -218,14 +218,15 @@ section { max-width: var(--maxw); margin: 0 auto; padding: 64px 24px; position: 
 
 /* ---------- bento ---------- */
 .bento__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.card { background: var(--card); border: 1px solid var(--rim); border-radius: var(--radius); padding: 26px; backdrop-filter: blur(16px); box-shadow: var(--shadow); transition: transform .3s ease, box-shadow .3s ease, background var(--tr), border-color var(--tr); position: relative; overflow: hidden; }
-.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-.card--wide { grid-column: span 2; display: flex; align-items: center; gap: 24px; }
-.card--wide .card__body { flex: 1; }
-.card--soft { background: linear-gradient(135deg, var(--accent-soft), var(--card)); }
-.card__ic { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-size: 20px; margin-bottom: 16px; }
-.card h3 { font-size: 19px; margin-bottom: 8px; transition: color var(--tr); }
-.card p { color: var(--ink-2); font-size: 14.5px; transition: color var(--tr); }
+.card { background: var(--card); border: 1px solid var(--rim); border-radius: var(--radius); padding: 30px 28px; backdrop-filter: blur(16px); box-shadow: var(--shadow), inset 0 1px 0 var(--rim); transition: transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .4s ease, background var(--tr), border-color var(--tr); position: relative; overflow: hidden; }
+.card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg), inset 0 1px 0 var(--rim); }
+.card--feature { grid-column: 1 / -1; display: flex; align-items: center; gap: 44px; padding: 36px 34px; }
+.card--feature .card__body { flex: 1; max-width: 540px; }
+.card--feature .card__viz { flex: none; }
+.card__ic { display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 13px; background: var(--accent-soft); color: var(--accent); margin-bottom: 18px; }
+.card__ic svg { width: 21px; height: 21px; }
+.card h3 { font-size: 18.5px; margin-bottom: 9px; transition: color var(--tr); }
+.card p { color: var(--ink-2); font-size: 14.5px; line-height: 1.56; transition: color var(--tr); }
 .miniradar { position: relative; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, var(--accent-soft), transparent 70%); border: 1px solid var(--border-2); flex: none; }
 .miniradar span { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); border: 1px solid var(--border-2); border-radius: 50%; }
 .miniradar span:nth-child(1){width:88%;height:88%;} .miniradar span:nth-child(2){width:56%;height:56%;} .miniradar span:nth-child(3){width:24%;height:24%;}
@@ -341,7 +342,7 @@ section { max-width: var(--maxw); margin: 0 auto; padding: 64px 24px; position: 
 @media (max-width: 900px) {
   .nav__links { display: none; }
   .bento__grid { grid-template-columns: 1fr; }
-  .card--wide { grid-column: span 1; flex-direction: column; align-items: flex-start; }
+  .card--feature { flex-direction: column; align-items: flex-start; gap: 22px; }
   .row { grid-template-columns: 1fr; gap: 24px; padding: 28px; }
   .plans { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2,1fr); }
