@@ -48,12 +48,14 @@
       const t = p * (video.duration - 0.06);
       if (Math.abs(video.currentTime - t) > 0.04) { try { video.currentTime = t; } catch (e) {} }
     }
-    body.classList.toggle("dark", p > 0.52);
+    // two-stage theme: light -> dusk -> dark
+    body.classList.toggle("dusk", p >= 0.3 && p < 0.62);
+    body.classList.toggle("dark", p >= 0.62);
     if (nav) nav.classList.toggle("scrolled", y > 16);
 
     if (!reduce && video) {
       const delta = Math.abs(y - lastY);
-      const band = (p > 0.4 && p < 0.64) ? 5 : 0;        // extra blur across the flip zone
+      const band = (p > 0.24 && p < 0.68) ? 5 : 0;       // extra blur across both flip zones
       targetBlur = Math.min(Math.max(targetBlur, delta * 0.55 + band), 22);
       if (!blurRaf && targetBlur > 0.25) blurRaf = requestAnimationFrame(blurLoop);
     }
