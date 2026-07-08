@@ -4,6 +4,16 @@
 (function () {
   "use strict";
 
+  /* appear on load (staggered, Framer-style) */
+  function runAppear() {
+    document.querySelectorAll(".appear").forEach((el) => {
+      const d = parseInt(el.dataset.delay || "0", 10);
+      setTimeout(() => el.classList.add("shown"), 120 + d * 110);
+    });
+  }
+  if (document.readyState !== "loading") runAppear();
+  else document.addEventListener("DOMContentLoaded", runAppear);
+
   /* nav scroll state */
   const nav = document.getElementById("nav");
   const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 16);

@@ -10,10 +10,12 @@ This repo is the **landing page** (first milestone). Next: web app, then iOS app
 Static site — plain HTML / CSS / JS. No build step. Deployed on Vercel.
 
 ## Design
-Light "sky" theme: pale-blue background (a sky image generated with Higgsfield,
-`assets/sky.png`), glassmorphism cards, bento grid, floating nav pill, clean
-animated buttons. Fonts: General Sans (display) + Inter (body) + JetBrains Mono (data).
-Inspired by the Fluence AI Framer template.
+Light "sky" theme with a Framer-style feel. Hero uses a 15s cinematic video
+background (`assets/rise.mp4`) — a camera ascent from Earth's sky into space,
+generated with Higgsfield / Seedance 2.0 from the `assets/sky.png` still (also
+Higgsfield). Glassmorphism cards, bento grid, floating nav pill, gradient-blur
+accents, scrolling ticker, big gradient footer watermark, on-load appear
+animations. Font: DM Sans throughout. Inspired by the Fluence AI Framer template.
 
 ## Local dev
 Just open `index.html`, or serve it:

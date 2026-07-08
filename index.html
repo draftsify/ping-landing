@@ -12,19 +12,13 @@
 
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='6' fill='%232f6bff'/%3E%3C/svg%3E" />
 
-  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- sky background -->
-  <div class="sky" aria-hidden="true"></div>
-  <div class="sky-fade" aria-hidden="true"></div>
-
   <!-- NAV -->
   <header class="nav" id="nav">
     <nav class="nav__pill" aria-label="Primary">
@@ -46,31 +40,33 @@
 
   <main>
     <!-- HERO -->
-    <section class="hero">
-      <a href="#access" class="pill">
-        <span class="pill__dot"></span>
-        Live signal engine · private beta
-      </a>
-      <h1 class="hero__title">Catch the narrative<br />before the market does.</h1>
-      <p class="hero__sub">
-        ping reads the narratives, memes and cultural signals moving the memecoin market
-        in real time — ranked by momentum, not by follower count. You see the move
-        while it's forming, not after it's priced in.
-      </p>
-      <div class="hero__actions">
-        <a href="#access" class="btn btn--primary btn--lg">
-          <span class="btn__label" data-text="Claim early access">Claim early access</span>
-        </a>
-        <a href="#product" class="btn btn--glass btn--lg">
-          <span class="btn__label" data-text="See it live">See it live</span>
-        </a>
-      </div>
-      <div class="hero__proof">
-        <div class="avatars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-        <p><strong>2,400+</strong> traders on the waitlist</p>
+    <section class="hero-wrap">
+      <div class="hero">
+        <video class="hero__video" autoplay muted loop playsinline poster="assets/sky.png">
+          <source src="assets/rise.mp4" type="video/mp4" />
+        </video>
+        <div class="hero__scrim" aria-hidden="true"></div>
+        <div class="hero__content">
+          <a href="#access" class="pill pill--glass appear" data-delay="0">
+            <span class="pill__dot"></span> Live signal engine · private beta
+          </a>
+          <h1 class="hero__title appear" data-delay="1">Catch the narrative<br />before the market does.</h1>
+          <p class="hero__sub appear" data-delay="2">
+            ping reads the narratives, memes and cultural signals moving the memecoin
+            market in real time — ranked by momentum, not by follower count.
+          </p>
+          <div class="hero__actions appear" data-delay="3">
+            <a href="#access" class="btn btn--primary btn--lg"><span class="btn__label" data-text="Claim early access">Claim early access</span></a>
+            <a href="#product" class="btn btn--frost btn--lg"><span class="btn__label" data-text="See it live">See it live</span></a>
+          </div>
+          <div class="hero__proof appear" data-delay="4">
+            <div class="avatars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            <p><strong>2,400+</strong> traders on the waitlist</p>
+          </div>
+        </div>
       </div>
 
-      <!-- product panel -->
+      <!-- product panel overlapping hero -->
       <div class="panel reveal" id="product">
         <div class="panel__bar">
           <div class="panel__dots"><span></span><span></span><span></span></div>
@@ -92,17 +88,17 @@
 
     <!-- SOURCES -->
     <section class="sources">
-      <p class="sources__label">Listening across the platforms where culture moves first</p>
+      <p class="sources__label">Listening where culture moves first</p>
       <div class="sources__row">
         <span>Crypto Twitter</span><span>Telegram</span><span>TikTok</span>
         <span>Farcaster</span><span>Discord</span><span>Reddit</span><span>On-chain</span>
       </div>
     </section>
 
-    <!-- BENTO / FEATURES -->
+    <!-- BENTO -->
     <section class="bento" id="signals">
       <div class="head">
-        <span class="eyebrow">The engine</span>
+        <span class="tag">The engine</span>
         <h2>Every signal, ranked by momentum.</h2>
         <p>One screen that turns the noise of the internet into a ranked, real-time read on what's actually moving.</p>
       </div>
@@ -125,9 +121,9 @@
         <article class="card reveal">
           <span class="card__ic">◈</span>
           <h3>On-chain confirmation</h3>
-          <p>Cross-reference cultural signals with real wallet flows. When smart money starts buying the story, you're notified instantly.</p>
+          <p>Cross-reference cultural signals with real wallet flows. When smart money buys the story, you're notified instantly.</p>
         </article>
-        <article class="card card--wide reveal card--soft">
+        <article class="card card--wide card--soft reveal">
           <div class="card__body">
             <span class="card__ic">◔</span>
             <h3>Alerts that reach you first</h3>
@@ -141,11 +137,12 @@
       </div>
     </section>
 
-    <!-- FEATURE ROWS -->
+    <!-- FEATURE ROW -->
     <section class="rows">
       <div class="row reveal">
+        <div class="row__glow" aria-hidden="true"></div>
         <div class="row__text">
-          <span class="eyebrow">Signal vs noise</span>
+          <span class="tag">Signal vs noise</span>
           <h3>Hours ahead of the timeline.</h3>
           <p>The same signal, two lenses. ping detects a breakout the moment velocity spikes — long before a big account tweets it and the candle is already gone.</p>
           <ul class="ticks">
@@ -186,7 +183,7 @@
     <!-- PRICING -->
     <section class="pricing" id="pricing">
       <div class="head">
-        <span class="eyebrow">Pricing</span>
+        <span class="tag">Pricing</span>
         <h2>Simple, while it's early.</h2>
         <p>Lock in beta pricing now. It goes up when we open the doors.</p>
       </div>
@@ -195,7 +192,7 @@
           <h4>Scout</h4>
           <p class="plan__sub">For getting a feel of the radar.</p>
           <div class="plan__price">Free</div>
-          <a href="#access" class="btn btn--glass btn--full"><span class="btn__label" data-text="Start free">Start free</span></a>
+          <a href="#access" class="btn btn--frost btn--full"><span class="btn__label" data-text="Start free">Start free</span></a>
           <ul class="feats">
             <li>Top 10 live narratives</li>
             <li>15-minute delayed signals</li>
@@ -219,7 +216,7 @@
           <h4>Desk</h4>
           <p class="plan__sub">For funds and trading groups.</p>
           <div class="plan__price">$149<span>/mo</span></div>
-          <a href="#access" class="btn btn--glass btn--full"><span class="btn__label" data-text="Talk to us">Talk to us</span></a>
+          <a href="#access" class="btn btn--frost btn--full"><span class="btn__label" data-text="Talk to us">Talk to us</span></a>
           <ul class="feats">
             <li>Everything in Degen</li>
             <li>API access &amp; webhooks</li>
@@ -230,10 +227,18 @@
       </div>
     </section>
 
+    <!-- TICKER -->
+    <section class="ticker-wrap" aria-hidden="true">
+      <div class="ticker">
+        <span>Catch the narrative</span><i>✦</i><span>Catch the narrative</span><i>✦</i>
+        <span>Catch the narrative</span><i>✦</i><span>Catch the narrative</span><i>✦</i>
+      </div>
+    </section>
+
     <!-- FAQ -->
     <section class="faq" id="faq">
       <div class="head">
-        <span class="eyebrow">FAQ</span>
+        <span class="tag">FAQ</span>
         <h2>Good questions.</h2>
       </div>
       <div class="faq__list">
@@ -245,16 +250,19 @@
     </section>
 
     <!-- CTA -->
-    <section class="cta" id="access">
-      <div class="cta__card reveal">
-        <span class="pill pill--center"><span class="pill__dot"></span>2,400+ waiting · invites weekly</span>
-        <h2>Stop being exit liquidity.</h2>
-        <p>Get early access to ping and read the market while it's still noise.</p>
-        <form class="waitform" id="waitform">
-          <input type="email" required placeholder="you@wallet.xyz" aria-label="Email address" />
-          <button type="submit" class="btn btn--primary"><span class="btn__label" data-text="Get access">Get access</span></button>
-        </form>
-        <p class="waitform__note" id="formNote">No spam. Just signal. Unsubscribe anytime.</p>
+    <section class="cta-wrap" id="access">
+      <div class="cta reveal">
+        <div class="cta__blur" aria-hidden="true"></div>
+        <div class="cta__inner">
+          <span class="pill pill--glass"><span class="pill__dot"></span> 2,400+ waiting · invites weekly</span>
+          <h2>Stop being exit liquidity.</h2>
+          <p>Get early access to ping and read the market while it's still noise.</p>
+          <form class="waitform" id="waitform">
+            <input type="email" required placeholder="you@wallet.xyz" aria-label="Email address" />
+            <button type="submit" class="btn btn--light"><span class="btn__label" data-text="Get access">Get access</span></button>
+          </form>
+          <p class="waitform__note" id="formNote">No spam. Just signal. Unsubscribe anytime.</p>
+        </div>
       </div>
     </section>
   </main>
