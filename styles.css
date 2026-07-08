@@ -68,8 +68,8 @@ img, video { display: block; max-width: 100%; }
 h1, h2, h3, h4, h5 { letter-spacing: -0.025em; font-weight: 600; }
 
 /* ---------- full-screen background ---------- */
-.bg { position: fixed; inset: 0; z-index: -3; background: var(--base); transition: background var(--tr); }
-.bg__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.bg { position: fixed; inset: 0; z-index: -3; background: var(--base); transition: background var(--tr); overflow: hidden; }
+.bg__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); transform-origin: center; will-change: filter; }
 .bg__veil { position: absolute; inset: 0; background: var(--veil); transition: background var(--tr); }
 
 /* ---------- shared ---------- */

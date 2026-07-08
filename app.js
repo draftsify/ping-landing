@@ -27,17 +27,37 @@
     }
   }
 
+  // motion blur that masks scrub stepping + the theme flip
+  let lastY = window.scrollY;
+  let curBlur = 0, targetBlur = 0, blurRaf = null;
+  function blurLoop() {
+    curBlur += (targetBlur - curBlur) * 0.2;
+    targetBlur *= 0.84;
+    if (video) video.style.filter = curBlur > 0.25 ? "blur(" + curBlur.toFixed(2) + "px)" : "";
+    if (curBlur > 0.25 || targetBlur > 0.25) { blurRaf = requestAnimationFrame(blurLoop); }
+    else { curBlur = 0; targetBlur = 0; if (video) video.style.filter = ""; blurRaf = null; }
+  }
+
   let ticking = false;
   function frame() {
     ticking = false;
+    const y = window.scrollY;
     const journey = window.innerHeight * 2.4;
-    const p = Math.min(Math.max(window.scrollY / journey, 0), 1);
+    const p = Math.min(Math.max(y / journey, 0), 1);
     if (scrub && video && video.duration) {
       const t = p * (video.duration - 0.06);
       if (Math.abs(video.currentTime - t) > 0.04) { try { video.currentTime = t; } catch (e) {} }
     }
     body.classList.toggle("dark", p > 0.52);
-    if (nav) nav.classList.toggle("scrolled", window.scrollY > 16);
+    if (nav) nav.classList.toggle("scrolled", y > 16);
+
+    if (!reduce && video) {
+      const delta = Math.abs(y - lastY);
+      const band = (p > 0.4 && p < 0.64) ? 5 : 0;        // extra blur across the flip zone
+      targetBlur = Math.min(Math.max(targetBlur, delta * 0.55 + band), 22);
+      if (!blurRaf && targetBlur > 0.25) blurRaf = requestAnimationFrame(blurLoop);
+    }
+    lastY = y;
   }
   window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }, { passive: true });
   window.addEventListener("resize", frame, { passive: true });
