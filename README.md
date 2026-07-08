@@ -9,6 +9,12 @@ This repo is the **landing page** (first milestone). Next: web app, then iOS app
 ## Stack
 Static site — plain HTML / CSS / JS. No build step. Deployed on Vercel.
 
+## Design
+Light "sky" theme: pale-blue background (a sky image generated with Higgsfield,
+`assets/sky.png`), glassmorphism cards, bento grid, floating nav pill, clean
+animated buttons. Fonts: General Sans (display) + Inter (body) + JetBrains Mono (data).
+Inspired by the Fluence AI Framer template.
+
 ## Local dev
 Just open `index.html`, or serve it:
 ```bash
