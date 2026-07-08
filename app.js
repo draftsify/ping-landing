@@ -3,8 +3,47 @@
    ============================================================ */
 (function () {
   "use strict";
+  const body = document.body;
+  const nav = document.getElementById("nav");
+  const video = document.getElementById("bgvideo");
 
-  /* appear on load (staggered, Framer-style) */
+  /* ---------- background: scrub sky→space on scroll + flip theme ---------- */
+  const coarse = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const scrub = video && !coarse && !reduce;
+
+  if (video) {
+    if (scrub) {
+      video.pause();
+      // prime decoding so paused seeks render a frame
+      const prime = () => { video.play().then(() => video.pause()).catch(() => {}); };
+      if (video.readyState >= 2) prime();
+      else video.addEventListener("loadeddata", prime, { once: true });
+    } else {
+      // touch / reduced-motion: gentle ambient loop instead of scrubbing
+      video.loop = true;
+      video.autoplay = true;
+      video.play().catch(() => {});
+    }
+  }
+
+  let ticking = false;
+  function frame() {
+    ticking = false;
+    const journey = window.innerHeight * 2.4;
+    const p = Math.min(Math.max(window.scrollY / journey, 0), 1);
+    if (scrub && video && video.duration) {
+      const t = p * (video.duration - 0.06);
+      if (Math.abs(video.currentTime - t) > 0.04) { try { video.currentTime = t; } catch (e) {} }
+    }
+    body.classList.toggle("dark", p > 0.52);
+    if (nav) nav.classList.toggle("scrolled", window.scrollY > 16);
+  }
+  window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }, { passive: true });
+  window.addEventListener("resize", frame, { passive: true });
+  frame();
+
+  /* ---------- appear on load (staggered) ---------- */
   function runAppear() {
     document.querySelectorAll(".appear").forEach((el) => {
       const d = parseInt(el.dataset.delay || "0", 10);
@@ -14,21 +53,13 @@
   if (document.readyState !== "loading") runAppear();
   else document.addEventListener("DOMContentLoaded", runAppear);
 
-  /* nav scroll state */
-  const nav = document.getElementById("nav");
-  const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 16);
-  window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
-
-  /* reveal on scroll */
+  /* ---------- reveal on scroll ---------- */
   const io = new IntersectionObserver((entries) => {
-    entries.forEach((e) => {
-      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
-    });
+    entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
   }, { threshold: 0.12 });
   document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
-  /* product feed */
+  /* ---------- product feed ---------- */
   const feed = document.getElementById("feed");
   const NARRATIVES = [
     { name: "AI dog szn", tk: "$BONKAI", tags: ["Narrative", "TikTok"], src: "TikTok · CT", score: 94, chg: "+412%", hot: true },
@@ -73,7 +104,7 @@
     fio.observe(feed);
   }
 
-  /* stat counters */
+  /* ---------- stat counters ---------- */
   const easeOut = (t) => 1 - Math.pow(1 - t, 3);
   function count(el) {
     const target = parseInt(el.dataset.count, 10);
@@ -93,7 +124,7 @@
   }, { threshold: 0.5 });
   document.querySelectorAll(".stat__n").forEach((el) => sio.observe(el));
 
-  /* waitlist form */
+  /* ---------- waitlist form ---------- */
   const form = document.getElementById("waitform");
   const note = document.getElementById("formNote");
   if (form) {

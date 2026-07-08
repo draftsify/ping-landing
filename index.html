@@ -19,6 +19,14 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- full-screen video background -->
+  <div class="bg" aria-hidden="true">
+    <video id="bgvideo" class="bg__video" muted playsinline preload="auto" poster="assets/sky.png">
+      <source src="assets/rise.mp4" type="video/mp4" />
+    </video>
+    <div class="bg__veil"></div>
+  </div>
+
   <!-- NAV -->
   <header class="nav" id="nav">
     <nav class="nav__pill" aria-label="Primary">
@@ -32,41 +40,32 @@
         <a href="#pricing">Pricing</a>
         <a href="#faq">FAQ</a>
       </div>
-      <a href="#access" class="btn btn--primary btn--sm">
-        <span class="btn__label" data-text="Get access">Get access</span>
-      </a>
+      <a href="#access" class="btn btn--primary btn--sm"><span class="btn__label" data-text="Get access">Get access</span></a>
     </nav>
   </header>
 
   <main>
     <!-- HERO -->
-    <section class="hero-wrap">
-      <div class="hero">
-        <video class="hero__video" autoplay muted loop playsinline poster="assets/sky.png">
-          <source src="assets/rise.mp4" type="video/mp4" />
-        </video>
-        <div class="hero__scrim" aria-hidden="true"></div>
-        <div class="hero__content">
-          <a href="#access" class="pill pill--glass appear" data-delay="0">
-            <span class="pill__dot"></span> Live signal engine · private beta
-          </a>
-          <h1 class="hero__title appear" data-delay="1">Catch the narrative<br />before the market does.</h1>
-          <p class="hero__sub appear" data-delay="2">
-            ping reads the narratives, memes and cultural signals moving the memecoin
-            market in real time — ranked by momentum, not by follower count.
-          </p>
-          <div class="hero__actions appear" data-delay="3">
-            <a href="#access" class="btn btn--primary btn--lg"><span class="btn__label" data-text="Claim early access">Claim early access</span></a>
-            <a href="#product" class="btn btn--frost btn--lg"><span class="btn__label" data-text="See it live">See it live</span></a>
-          </div>
-          <div class="hero__proof appear" data-delay="4">
-            <div class="avatars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-            <p><strong>2,400+</strong> traders on the waitlist</p>
-          </div>
-        </div>
+    <section class="hero">
+      <a href="#access" class="pill appear" data-delay="0"><span class="pill__dot"></span> Live signal engine · private beta</a>
+      <h1 class="hero__title appear" data-delay="1">Catch the narrative<br />before the market does.</h1>
+      <p class="hero__sub appear" data-delay="2">
+        ping reads the narratives, memes and cultural signals moving the memecoin
+        market in real time — ranked by momentum, not by follower count.
+      </p>
+      <div class="hero__actions appear" data-delay="3">
+        <a href="#access" class="btn btn--primary btn--lg"><span class="btn__label" data-text="Claim early access">Claim early access</span></a>
+        <a href="#product" class="btn btn--frost btn--lg"><span class="btn__label" data-text="See it live">See it live</span></a>
       </div>
+      <div class="hero__proof appear" data-delay="4">
+        <div class="avatars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        <p><strong>2,400+</strong> traders on the waitlist</p>
+      </div>
+      <span class="scroll-cue appear" data-delay="5" aria-hidden="true"></span>
+    </section>
 
-      <!-- product panel overlapping hero -->
+    <!-- PRODUCT PANEL -->
+    <section class="panel-sec">
       <div class="panel reveal" id="product">
         <div class="panel__bar">
           <div class="panel__dots"><span></span><span></span><span></span></div>
