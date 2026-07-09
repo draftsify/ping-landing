@@ -28,7 +28,14 @@ svg { display: block; }
 /* ---------- navbar ---------- */
 .nav { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 22px; height: 60px; padding: 0 clamp(14px, 3vw, 26px); background: var(--bg); border-bottom: 1px solid var(--line); }
 .nav__brand { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 17px; letter-spacing: -0.02em; }
-.nav__logo { height: 26px; width: auto; }
+.nav__logo { height: 25px; width: auto; }
+.nav__main { display: flex; gap: 2px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+.mtab { font-size: 13.5px; font-weight: 600; color: var(--ink-2); padding: 7px 16px; border-radius: 9px; transition: color .15s, background .15s; }
+.mtab:hover { color: #fff; }
+.mtab--on { background: var(--grad); color: #fff; box-shadow: 0 8px 18px -12px rgba(47,107,255,0.9); }
+
+/* sub-navbar (token views) */
+.subnav { display: flex; align-items: center; padding: 12px clamp(14px, 3vw, 26px) 0; max-width: 1440px; margin: 0 auto; width: 100%; }
 .nav__tabs { display: flex; gap: 2px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
 .ntab { font-family: var(--f); font-size: 13.5px; font-weight: 600; color: var(--ink-2); background: none; border: none; padding: 7px 15px; border-radius: 9px; cursor: pointer; transition: color .15s, background .15s; }
 .ntab:hover { color: #fff; }

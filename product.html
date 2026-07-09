@@ -12,19 +12,18 @@
   <link rel="stylesheet" href="product.css" />
 </head>
 <body>
-  <div class="bg" aria-hidden="true">
-    <video id="bgvideo" muted playsinline preload="auto" poster="assets/descent-poster.jpg">
-      <source src="assets/descent.mp4" type="video/mp4" />
-    </video>
-  </div>
-  <div class="bg-scrim" aria-hidden="true"></div>
-
-  <header class="topbar">
-    <a href="index.html" class="brand" aria-label="ping home"><img src="assets/logo-white.png" alt="ping" class="brand__logo" /></a>
-    <div class="topbar__right">
-      <button class="ghost" id="newchat" hidden>New</button>
-      <a href="dex.html" class="ghost">Trading ↗</a>
-      <a href="index.html" class="ghost">Back to site ↗</a>
+  <header class="nav">
+    <a class="nav__brand" href="index.html" aria-label="ping home">
+      <img class="nav__logo" src="assets/logo-white.png" alt="" />
+      <span>ping</span>
+    </a>
+    <nav class="nav__main">
+      <a class="mtab mtab--on" href="product.html">Assistant</a>
+      <a class="mtab" href="dex.html">Tokens</a>
+    </nav>
+    <div class="nav__right">
+      <button class="ghost" id="newchat" hidden>New chat</button>
+      <a class="ghost" href="index.html">Back to site ↗</a>
     </div>
   </header>
 
