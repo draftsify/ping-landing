@@ -5,7 +5,7 @@
   "use strict";
   const $ = (id) => document.getElementById(id);
   const rowsEl = $("rows"), stateEl = $("state"), footEl = $("foot"),
-    searchEl = $("search"), refreshBtn = $("refresh"), headEl = $("dexHead");
+    searchEl = $("search"), refreshBtn = $("refresh"), headEl = $("dexHead"), chainsEl = $("chains");
 
   const API_BOOSTS = "https://api.dexscreener.com/token-boosts/top/v1";
   const API_TOKENS = "https://api.dexscreener.com/latest/dex/tokens/";
@@ -15,6 +15,15 @@
   let data = [];              // normalized rows
   let sort = { key: "vol", dir: -1 };
   let filter = "";
+  let chainFilter = "";       // "" = all chains
+
+  // pretty names for common chains (fallback: capitalized id)
+  const CHAIN_NAME = {
+    solana: "Solana", ethereum: "Ethereum", bsc: "BSC", base: "Base", robinhood: "Robinhood",
+    polygon: "Polygon", arbitrum: "Arbitrum", hyperliquid: "Hyperliquid", tron: "Tron", sui: "Sui",
+    avalanche: "Avalanche", ton: "TON", pulsechain: "PulseChain", sonic: "Sonic", monad: "Monad",
+  };
+  const chainName = (c) => CHAIN_NAME[c] || (c ? c[0].toUpperCase() + c.slice(1) : c);
 
   /* ---------- formatting ---------- */
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -132,6 +141,7 @@
         };
       });
 
+      renderChains();
       render();
       const t = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
       footEl.textContent = `${data.length} pairs · live from DexScreener · updated ${t} · auto-refreshes every 45s`;
@@ -143,11 +153,35 @@
     }
   }
 
+  /* ---------- chain selector ---------- */
+  function renderChains() {
+    if (!chainsEl) return;
+    const counts = {};
+    data.forEach((r) => { const c = r.chainId || "?"; counts[c] = (counts[c] || 0) + 1; });
+    const chains = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+    // drop a stale filter if that chain vanished from the feed
+    if (chainFilter && !counts[chainFilter]) chainFilter = "";
+    const chip = (id, label, count, on) =>
+      `<button class="chainchip${on ? " chainchip--on" : ""}" data-chain="${esc(id)}">` +
+      (id ? `<img src="${CHAIN_ICON(id)}" alt="" loading="lazy" onerror="this.style.display='none'">` : "") +
+      `${esc(label)}<span class="cc-count">${count}</span></button>`;
+    chainsEl.innerHTML =
+      chip("", "All", data.length, !chainFilter) +
+      chains.map((c) => chip(c, chainName(c), counts[c], chainFilter === c)).join("");
+  }
+  if (chainsEl) chainsEl.addEventListener("click", (e) => {
+    const b = e.target.closest(".chainchip"); if (!b) return;
+    chainFilter = b.dataset.chain || "";
+    renderChains();
+    render();
+  });
+
   /* ---------- render ---------- */
   function render() {
     const key = sort.key, dir = sort.dir;
     const num = { price: "price", age: "age", txns: "txns", vol: "vol", makers: "makers", c5: "c5", c1: "c1", c6: "c6", c24: "c24", liq: "liq", mcap: "mcap" };
     let list = data.slice();
+    if (chainFilter) list = list.filter((r) => r.chainId === chainFilter);
     if (filter) {
       const q = filter.toLowerCase();
       list = list.filter((r) =>

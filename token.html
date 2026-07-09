@@ -15,6 +15,11 @@
     .tk-back { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-2); font-size: 13px; font-weight: 500; margin: 2px 0 12px; }
     .tk-back:hover { color: #fff; }
 
+    /* ---------- token banner (DexScreener header art) ---------- */
+    .tk-hero { position: relative; height: 150px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--panel-2) center/cover no-repeat; margin-bottom: 12px; }
+    .tk-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,17,23,0) 35%, rgba(14,17,23,0.55) 100%); }
+    @media (max-width: 620px) { .tk-hero { height: 110px; } }
+
     /* ---------- header card ---------- */
     .tk-head { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 14px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; margin-bottom: 14px; }
     .tk-id { display: flex; align-items: center; gap: 13px; min-width: 0; }
@@ -111,6 +116,7 @@
 
   <main class="tk">
     <a class="tk-back" href="dex.html">‹ All tokens</a>
+    <div class="tk-hero" id="tkHero" hidden></div>
     <div class="tk-head" id="tkHead"><div class="tk-id">Loading…</div></div>
     <div class="tk-grid">
       <div class="tk-chart"><div class="ld" id="tkLoad">Loading chart…</div><iframe id="tkChart" title="Price chart" loading="lazy"></iframe></div>

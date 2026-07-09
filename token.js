@@ -87,6 +87,11 @@
       const c24 = pct(ch.h24);
       document.title = "$" + sym + " · Ping";
 
+      /* banner (DexScreener header art) */
+      const hero = document.getElementById("tkHero");
+      const banner = p.info && p.info.header;
+      if (hero && banner) { hero.style.backgroundImage = `url("${esc(banner)}")`; hero.hidden = false; }
+
       /* header */
       const socs = socialList(p);
       head.innerHTML =
