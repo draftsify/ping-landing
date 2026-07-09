@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ping · trading</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="dex.css" />
+</head>
+<body>
+  <div class="bg-scrim" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a href="index.html" class="brand" aria-label="ping home"><img src="assets/logo-white.png" alt="ping" class="brand__logo" /></a>
+    <nav class="tabs">
+      <a href="product.html" class="tab">AI</a>
+      <a href="dex.html" class="tab tab--active">Trading</a>
+    </nav>
+    <div class="topbar__right">
+      <div class="live"><span class="live__dot"></span>Live</div>
+      <a href="index.html" class="ghost">Back to site ↗</a>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page__head">
+      <div>
+        <h1>Trading</h1>
+        <p class="sub">Live pairs across chains — trending &amp; boosted, ranked by volume.</p>
+      </div>
+      <div class="toolbar">
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input id="search" type="text" placeholder="Filter by name, symbol or chain…" autocomplete="off" />
+        </div>
+        <button class="refresh" id="refresh" title="Refresh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="dex-scroll">
+      <div class="dex">
+        <div class="dex-head" id="dexHead">
+          <div class="th th-token">Token</div>
+          <div class="th th-num" data-sort="price">Price</div>
+          <div class="th th-num" data-sort="age">Age</div>
+          <div class="th th-num" data-sort="txns">Txns</div>
+          <div class="th th-num" data-sort="vol">Volume</div>
+          <div class="th th-num" data-sort="makers">Traders</div>
+          <div class="th th-num" data-sort="c5">5M</div>
+          <div class="th th-num" data-sort="c1">1H</div>
+          <div class="th th-num" data-sort="c6">6H</div>
+          <div class="th th-num" data-sort="c24">24H</div>
+          <div class="th th-num" data-sort="liq">Liquidity</div>
+          <div class="th th-num" data-sort="mcap">MCAP</div>
+        </div>
+        <div id="rows"></div>
+      </div>
+    </div>
+
+    <div class="state" id="state">
+      <div class="spinner"></div>
+      <span>Loading live pairs from DexScreener…</span>
+    </div>
+    <p class="foot" id="foot"></p>
+  </main>
+
+  <script src="dex.js"></script>
+</body>
+</html>
