@@ -60,6 +60,7 @@ function normalizePair(p) {
     chain: p.chainId, dex: p.dexId, address: p.baseToken?.address, url: p.url,
     priceUsd: n(+p.priceUsd), mcap: n(p.marketCap || p.fdv), liq: n(p.liquidity?.usd),
     vol24: n(p.volume?.h24), vol1: n(p.volume?.h1),
+    image: p.info?.imageUrl || null,
     website: p.info?.websites?.[0]?.url || null,
     socials: (p.info?.socials || []).map((s) => ({ type: s.type, url: s.url })),
     ch: { m5: n(p.priceChange?.m5), h1: n(p.priceChange?.h1), h6: n(p.priceChange?.h6), h24: n(p.priceChange?.h24) },
@@ -68,11 +69,21 @@ function normalizePair(p) {
     ageMs: p.pairCreatedAt || 0,
   };
 }
+// pump.fun metadata (Solana) — name/symbol/description/image/launch-tweet, works for coins
+// with NO DexScreener paid profile (or not even indexed on a DEX yet)
+async function getPumpFun(mint) {
+  try {
+    const pf = await fetchJSON("https://frontend-api-v3.pump.fun/coins/" + encodeURIComponent(mint),
+      { headers: { "user-agent": "Mozilla/5.0", "accept": "application/json" } }, 8000);
+    if (pf && pf.name) return pf;
+  } catch (e) {}
+  return null;
+}
 async function getMarket(message) {
   const out = { token: null, trending: [] };
+  const addr = (message.match(/\b(0x[a-fA-F0-9]{40}|[1-9A-HJ-NP-Za-km-z]{32,44})\b/) || [])[1];
+  const ticker = (message.match(/\$([A-Za-z0-9]{2,15})/) || [])[1];
   try {
-    const addr = (message.match(/\b(0x[a-fA-F0-9]{40}|[1-9A-HJ-NP-Za-km-z]{32,44})\b/) || [])[1];
-    const ticker = (message.match(/\$([A-Za-z0-9]{2,15})/) || [])[1];
     let pairs = [];
     if (addr) {
       const d = await fetchJSON("https://api.dexscreener.com/latest/dex/tokens/" + encodeURIComponent(addr));
@@ -83,11 +94,37 @@ async function getMarket(message) {
       if (!pairs.length) pairs = d.pairs || [];
     }
     if (pairs.length) {
-      // prefer the actively-traded pair (24h volume), tiebreak on liquidity
       pairs.sort((a, b) => ((b.volume?.h24 || 0) - (a.volume?.h24 || 0)) || ((b.liquidity?.usd || 0) - (a.liquidity?.usd || 0)));
       out.token = normalizePair(pairs[0]);
     }
   } catch (e) {}
+
+  // enrich (or fully resolve) via pump.fun for Solana mints — covers unpaid / undexed coins
+  try {
+    const mint = (out.token && out.token.chain === "solana" && out.token.address) ? out.token.address
+               : (addr && !/^0x/.test(addr)) ? addr : null;
+    if (mint) {
+      const pf = await getPumpFun(mint);
+      if (pf) {
+        if (!out.token) out.token = {
+          symbol: pf.symbol, name: pf.name, chain: "solana", address: mint, quote: "SOL",
+          priceUsd: null, mcap: n(pf.usd_market_cap), liq: null, vol24: null,
+          ch: {}, txns24: 0, buys24: 0, sells24: 0, ageMs: pf.created_timestamp || 0,
+          socials: [], website: null, url: "https://dexscreener.com/solana/" + mint,
+        };
+        out.token.description = pf.description || out.token.description || "";
+        out.token.image = out.token.image || pf.image_uri || null;
+        out.token.athMcap = n(pf.ath_market_cap);
+        out.token.pumpTweet = pf.twitter || null;
+        out.token.pfTelegram = pf.telegram || null;
+        out.token.pfWebsite = pf.website || null;
+        out.token.pumpUrl = "https://pump.fun/coin/" + mint;
+        if (!out.token.mcap) out.token.mcap = n(pf.usd_market_cap);
+        if (!out.token.ageMs && pf.created_timestamp) out.token.ageMs = pf.created_timestamp;
+      }
+    }
+  } catch (e) {}
+
   // trending / boosted snapshot for market context
   try {
     const boosts = await fetchJSON("https://api.dexscreener.com/token-boosts/top/v1");
@@ -135,69 +172,51 @@ async function getTikTok(message) {
 }
 
 /* ---------- prompt ---------- */
-const SYSTEM = `You are Ping, a memecoin intelligence analyst and CT native since the WIF/BONK era — the friend in the group chat who actually gets what's happening on-chain.
-
-- Answer in 1–2 punchy sentences only (a TL;DR-style read). No sections, no lists, no preamble, no closing question.
-- Ground it in specifics when you have them (a named account, the launchpad, a comparable coin). If you don't have the data, say "unclear" or "no on-chain signal yet" — never bluff or invent wallets/names/numbers.
-- BANNED lines (instant credibility killers): "the community pushed it", "the meme took off", "gaining traction", "it looks promising", "people are excited", generic "NFA/DYOR". No corporate hedging ("it appears", "it seems", "potentially").
-- CT vocabulary is welcome for precision (bonding curve, LP burn, dev wallet, KOL rotation, mindshare, PVP, MC/FDV) — precision, not caricature.
+const SYSTEM = `You are Ping, a memecoin analyst who lives on Crypto Twitter. Explain like a sharp friend, in plain language.
+- 1–3 short sentences. Lead with the real reason it's moving, plus one concrete detail (who launched or pushed it, where the meme comes from, or a number that actually matters).
+- Use ONLY the real data provided (name, the project's own description, the launch tweet, socials, market stats, TikTok) plus your own knowledge. If something isn't there, say "unclear" — never invent numbers, wallets, founders or names.
+- No filler words, no hype clichés ("community is bullish", "gaining traction", "the meme took off"), no corporate hedging ("it appears", "it seems").
 - Reply in English. Use the conversation history for follow-ups.`;
 
-const SYSTEM_LONG = `# ROLE
-You are Ping, a memecoin intelligence analyst who has been living in the Solana trenches since the WIF/BONK era. You speak like a CT native who has personally traded through PVP wars, celebrity coin cycles, AI agent szn, political coin waves and animal metas. You are not a corporate AI. You are the friend in the group chat who actually understands what's happening on-chain and explains the mechanics without hedging.
+const SYSTEM_LONG = `You are Ping, a memecoin analyst who lives on Crypto Twitter. Explain clearly and naturally — like a smart friend who actually did the homework. Not a corporate AI, not a rigid template.
 
-# AVAILABLE DATA
-The context below gives you: live DexScreener market stats (price, MC/FDV, liquidity, volume, buys/sells, pair age), a TikTok virality read, and the token's official links. Use your OWN knowledge for history, KOLs and comparables. For on-chain specifics you cannot see (exact wallets, dev %, bundler/sniper %, LP burn, mint/freeze authority), DO NOT invent — follow the "WHEN YOU DON'T HAVE DATA" rule.
+Write a few short, dense paragraphs (no section headers, no bullet lists, no filler). Flow naturally through:
+- What it is and where the name / meme comes from — use the project's own description, the launch tweet and its socials to nail the real story and who's behind it.
+- Why it's moving now: who launched or amplified it, the hook, the TikTok/X buzz — tie each point to the real data or things you actually know.
+- A quick honest read on momentum and risk from the market data (mcap vs liquidity, volume, buys vs sells, pair age, distance from ATH) — plain words, but spell out the logic (e.g. "thin liquidity against a big mcap means it dumps fast the second flow stops").
 
-# NON-NEGOTIABLE RULES
-1. NEVER produce vague AI-slop like "the community pushed it", "the meme took off", "it looks hot right now". Instant credibility killers.
-2. NEVER use corporate hedging ("it appears", "it seems", "potentially"). State facts with confidence when you have data; explicitly say "unclear" or "no on-chain signal yet" when you don't.
-3. ALWAYS ground claims in specifics: named accounts (with follower counts / reputation if known), timestamps, exact wallets (truncated), specific launchpad, exact volumes, specific comparable coins from history.
-4. ALWAYS structure the thesis in the exact order of THE 5-PART FRAMEWORK. Never skip a section. If a section has no data, say "no signal on X yet" explicitly.
-5. NEVER give financial advice or price predictions. Explain the mechanics and context; the user decides.
-6. Tone: sharp, direct, native CT vocabulary — bonding curve, LP burn, dev wallet, insider snipe, sniper bots, bundlers, KOL rotation, mindshare, PVP, tape, cook, print, fumble, rug, honeypot, freeze authority, mint authority, migration, MC, FDV. Precision, not caricature.
-
-# THE 5-PART THESIS FRAMEWORK (this exact order)
-## 1. Origin — the zero-to-one moment
-First meme/moment/tweet (exact handle + timestamp if known). What made THIS the canonical token vs forks/copycats (dev identity, contract traits, timing edge). Launchpad + initial setup (Pump.fun, Believe, Bonk.fun, Boop, direct Raydium…). If it's a PVP situation, name the losers and why this one won.
-## 2. Mechanic Edge — why this one, not the others
-Tokenomics: supply, LP burn status, mint/freeze authority. Dev: doxxed/anon/history/rug history. Any structural edge (fees routed to a KOL wallet, revshare, buyback, unique migration path). Bundler/sniper situation at launch and whether that's red or green in context.
-## 3. Amplification — who picked it up, in what order
-KOLs who called it (rough follower count + historical hit rate if known). Order matters: first caller, then who followed, when big accounts jumped in (Ansem, Mando, Cented, etc. — whoever's relevant). Any celebrity/mainstream crossover (a TikTok going viral, a public figure noticing, an article). Group chats / TG calls / Discord raids if known.
-## 4. On-chain — what the tape actually says
-Volume trajectory (first hour/day), holder-count growth, smart-money wallets in (name them if you can — orangie/cupsey-style early callers), dev wallet %, top-10 %, any suspicious concentration, chart structure (accumulation / parabolic / distribution).
-## 5. Risk & Comparables
-Comparable coins from the same narrative type (celebrity: MOTHER, DADDY; AI agents: GOAT, ZEREBRO, FARTCOIN; animals: WIF, BONK, POPCAT) and how they played out (peak MC, timeline). Specific risks HERE (LP not burnt, dev history, insider concentration, narrative fatigue, competing forks). Where in the lifecycle: pre-pump, discovery, mid-tier consolidation, extension, distribution, post-peak.
-
-# OUTPUT FORMAT
-Write in short paragraphs within each section (you're explaining, not listing). Bold section headers exactly: **Origin**, **Mechanic Edge**, **Amplification**, **On-chain**, **Risk & Comparables**. Every named entity should feel deliberately chosen, not filler. End with a one-line **TL;DR** that captures the actual thesis in one sentence — not a disclaimer.
-
-# WHEN YOU DON'T HAVE DATA
-If the context doesn't give specifics for a section, DO NOT invent it. Write explicitly: "No clear signal on [X] from available data — needs a manual check on [source]." That is more credible than hallucinating a wallet or a KOL name.
-
-# BLACKLIST (never write)
-"The community is bullish" · "It's gaining traction" · "The meme took off" · "People are excited" · "It looks promising" · "This coin has potential" · explicit "DYOR / NFA / not financial advice" · any sentence that could describe any random coin.
-
-Reply in English. Use the conversation history for follow-ups.`;
+Rules: dense with logic, light on words — every sentence earns its place, no padding. Ground every claim in the data provided or things you genuinely know; if you don't have it, say "unclear" or "no signal yet" — never invent a number, wallet, founder or KOL. No hype clichés ("community is bullish", "gaining traction", "the meme took off"), no corporate hedging, no disclaimers. You may **bold** a few key words. Reply in English. Use the conversation history for follow-ups.`;
 
 function groundingText(market, tiktok) {
   const lines = [];
   const t = market?.token;
   if (t) {
-    lines.push(`COIN: ${t.name || t.symbol} ($${t.symbol}) — ${t.chain} chain, trading as ${t.symbol}/${t.quote} on ${t.dex}.`);
+    lines.push(`COIN: ${t.name || t.symbol} ($${t.symbol}) on ${t.chain}${t.quote ? ` — pair vs ${t.quote}${t.dex ? " on " + t.dex : ""}` : ""}.`);
+    if (t.description) lines.push(`The project's own description: "${String(t.description).slice(0, 500)}"`);
     const links = [];
-    if (t.website) links.push("website " + t.website);
+    if (t.pumpTweet) links.push("launch/announcement tweet: " + t.pumpTweet);
     (t.socials || []).forEach((s) => links.push(`${s.type}: ${s.url}`));
-    if (links.length) lines.push("Official links (use these to figure out the story): " + links.join(" · "));
-    lines.push(`(Market snapshot — ONLY mention if the user asks about the trade/price: mcap ${abbr(t.mcap)}, liquidity ${abbr(t.liq)}, 24h vol ${abbr(t.vol24)}, 24h ${pct(t.ch.h24)}, age ${ageStr(t.ageMs)}.)`);
+    if (t.website || t.pfWebsite) links.push("website: " + (t.website || t.pfWebsite));
+    if (t.pfTelegram) links.push("telegram: " + t.pfTelegram);
+    if (links.length) lines.push("Socials & links (real, attached to the coin — use to explain the story): " + links.join(" · "));
+    const mk = [];
+    if (t.priceUsd != null) mk.push("price $" + t.priceUsd);
+    if (t.mcap) mk.push("mcap " + abbr(t.mcap));
+    if (t.athMcap) mk.push("ATH mcap " + abbr(t.athMcap));
+    if (t.liq) mk.push("liquidity " + abbr(t.liq));
+    if (t.vol24) mk.push("24h vol " + abbr(t.vol24));
+    if (t.ch && t.ch.h24 != null) mk.push("24h " + pct(t.ch.h24));
+    if (t.ageMs) mk.push("age " + ageStr(t.ageMs));
+    if (t.txns24) mk.push(`${t.txns24} txns/24h (${t.buys24 || 0} buys / ${t.sells24 || 0} sells)`);
+    if (mk.length) lines.push("Market data (real, live): " + mk.join(", ") + ".");
   } else {
-    lines.push("No specific coin resolved from the message — answer from your own knowledge / ask them for a $ticker or contract.");
+    lines.push("No specific coin resolved — answer from your own knowledge, or ask for a $ticker / contract address.");
   }
   if (tiktok && !tiktok.error) {
-    lines.push(`TikTok buzz for "${tiktok.keyword}": ${tiktok.posts} recent posts, virality ${tiktok.viralityScore}/100 — i.e. how much it's spreading beyond Crypto Twitter (${tiktok.viralityScore >= 55 ? "spreading" : "still niche"}).`);
+    lines.push(`TikTok: "${tiktok.keyword}" has ${tiktok.posts} recent posts, virality ${tiktok.viralityScore}/100 — how much it's spreading beyond Crypto Twitter (${tiktok.viralityScore >= 55 ? "spreading" : "still niche"}).`);
   }
   if (market?.trending?.length) {
-    lines.push("For context, coins getting attention right now: " + market.trending.map((x) => x.symbol).join(", ") + ".");
+    lines.push("Also getting attention right now: " + market.trending.map((x) => x.symbol).join(", ") + ".");
   }
   return lines.join("\n");
 }
@@ -229,7 +248,7 @@ async function callAnthropic({ key, model, system, user, maxTokens }) {
 async function generate(message, market, tiktok, history, mode) {
   const long = mode === "long";
   const sys = long ? SYSTEM_LONG : SYSTEM;
-  const maxTokens = long ? 1300 : 200;
+  const maxTokens = long ? 620 : 220;
   const grounding = groundingText(market, tiktok);
   const user = `User message:\n"""${message}"""\n\nContext I've gathered:\n${grounding}`;
   const hist = Array.isArray(history) ? history.slice(-6).filter((m) => m && m.role && m.content) : [];
@@ -251,10 +270,14 @@ async function generate(message, market, tiktok, history, mode) {
 function buildSources(market) {
   const t = market && market.token;
   if (!t) return [];
-  const out = [];
-  (t.socials || []).forEach((s) => { if (s.url) out.push({ type: s.type, url: s.url }); });
-  if (t.website) out.push({ type: "website", url: t.website });
-  if (t.url) out.push({ type: "chart", url: t.url });
+  const out = [], seen = new Set();
+  const add = (type, url, label) => { if (url && !seen.has(url)) { seen.add(url); out.push(label ? { type, url, label } : { type, url }); } };
+  if (t.pumpTweet) add("x", t.pumpTweet, "Launch post on X");
+  (t.socials || []).forEach((s) => add(s.type, s.url));
+  add("telegram", t.pfTelegram);
+  add("website", t.website || t.pfWebsite);
+  if (t.chain && t.address) add("chart", `https://dexscreener.com/${t.chain}/${t.address}`, "DexScreener chart");
+  if (t.pumpUrl) add("website", t.pumpUrl, "pump.fun page");
   return out;
 }
 

@@ -11,8 +11,8 @@
 .act.ok { color: #35d99a; }
 
 /* Grok-style "Posts" sources card + popup */
-.srcs { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 7px 11px 7px 12px; border: 1px solid var(--line-2, rgba(255,255,255,0.16)); border-radius: 12px; background: rgba(255,255,255,0.04); color: var(--ink); font-family: var(--f); font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s; }
-.srcs:hover { background: rgba(255,255,255,0.08); }
+.srcs { display: flex; width: max-content; max-width: 100%; align-items: center; gap: 8px; margin-top: 12px; padding: 8px 13px; border: 1px solid var(--line); border-radius: 11px; background: rgba(255,255,255,0.035); color: var(--ink-2); font-family: var(--f); font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
+.srcs:hover { background: rgba(255,255,255,0.07); border-color: var(--line-2, rgba(255,255,255,0.16)); color: #fff; }
 .srcs__ic { display: inline-flex; }
 .srcs__ic svg { width: 14px; height: 14px; color: var(--ink-2); }
 .srcs__n { color: var(--ink-3); font-weight: 500; }
