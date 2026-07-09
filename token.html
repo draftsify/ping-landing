@@ -11,29 +11,92 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="dex.css" />
   <style>
-    .tk { max-width: 1500px; margin: 0 auto; padding: 14px clamp(14px, 3vw, 26px) 22px; }
-    .tk-back { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-2); font-size: 13px; font-weight: 500; margin: 4px 0 12px; }
+    .tk { max-width: 1440px; margin: 0 auto; padding: 14px clamp(14px, 3vw, 26px) 40px; }
+    .tk-back { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-2); font-size: 13px; font-weight: 500; margin: 2px 0 12px; }
     .tk-back:hover { color: #fff; }
-    .tk-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 13px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 12px; }
-    .tk-id { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .tk-id .logo { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: #1a2030; object-fit: cover; flex: none; }
-    .tk-sym { font-size: 19px; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
-    .tk-sym span { color: var(--ink-3); font-weight: 500; font-size: 15px; }
-    .tk-name { font-size: 12.5px; color: var(--ink-3); display: flex; align-items: center; gap: 7px; margin-top: 2px; }
-    .tk-name img { width: 15px; height: 15px; border-radius: 4px; }
-    .tk-price { margin-left: auto; text-align: right; }
-    .tk-price .p { font-size: 22px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
-    .tk-price .c { font-size: 14px; font-weight: 600; }
-    .tk-stats { display: flex; gap: 9px; flex-wrap: wrap; }
-    .tk-stat { background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 10px; padding: 7px 12px; }
-    .tk-stat b { display: block; font-size: 14px; color: #fff; font-variant-numeric: tabular-nums; }
-    .tk-stat span { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; }
-    .tk-chart { position: relative; height: calc(100svh - 250px); min-height: 400px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--panel); }
+
+    /* ---------- header card ---------- */
+    .tk-head { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 14px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; margin-bottom: 14px; }
+    .tk-id { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    .tk-logo { position: relative; flex: none; }
+    .tk-logo img, .tk-logo .ph { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--line); background: #1a2030; object-fit: cover; display: block; }
+    .tk-logo .chip-net { position: absolute; right: -3px; bottom: -3px; width: 19px; height: 19px; border-radius: 50%; border: 2px solid var(--panel); background: #1a2030; }
+    .tk-sym { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+    .tk-sym .quote { color: var(--ink-3); font-weight: 500; font-size: 15px; }
+    .tk-sub { display: flex; align-items: center; gap: 8px; margin-top: 3px; font-size: 12.5px; color: var(--ink-3); }
+    .tk-sub .dexi { width: 15px; height: 15px; border-radius: 4px; }
+    .tk-addr { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; color: var(--ink-3); background: none; border: none; font-family: var(--f); font-size: 12px; padding: 0; }
+    .tk-addr:hover { color: var(--ink-2); }
+    .tk-addr svg { width: 13px; height: 13px; }
+    .tk-socials { display: flex; gap: 6px; }
+    .tk-soc { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink-2); transition: all .15s; }
+    .tk-soc:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .tk-soc svg { width: 15px; height: 15px; }
+
+    .tk-metrics { margin-left: auto; display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; }
+    .tk-metric { display: flex; flex-direction: column; gap: 2px; padding: 8px 14px; border-radius: 11px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); min-width: 92px; }
+    .tk-metric.price { background: var(--grad); border-color: transparent; }
+    .tk-metric .k { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; }
+    .tk-metric.price .k { color: rgba(255,255,255,0.75); }
+    .tk-metric .v { font-size: 15px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+
+    /* ---------- body grid ---------- */
+    .tk-grid { display: grid; grid-template-columns: minmax(0,1fr) 340px; gap: 14px; align-items: start; }
+    .tk-chart { position: relative; height: calc(100svh - 300px); min-height: 440px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--panel); }
     .tk-chart iframe { width: 100%; height: 100%; border: 0; display: block; }
     .tk-chart .ld { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-3); font-size: 13px; }
+
+    .tk-side { display: flex; flex-direction: column; gap: 14px; }
+
+    /* banner (replaces buy panel) */
+    .tk-banner { position: relative; overflow: hidden; border-radius: 16px; border: 1px solid var(--line); background:
+        radial-gradient(120% 140% at 100% 0%, rgba(91,147,255,0.28) 0%, rgba(47,107,255,0.06) 42%, transparent 70%),
+        var(--panel); padding: 18px; }
+    .tk-banner .bear { position: absolute; right: -14px; bottom: -14px; width: 118px; opacity: 0.16; pointer-events: none; }
+    .tk-banner .kicker { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-2); }
+    .tk-banner .kicker::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 10px var(--accent-2); }
+    .tk-banner h3 { font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -0.02em; margin: 9px 0 5px; }
+    .tk-banner p { font-size: 12.5px; line-height: 1.5; color: var(--ink-2); margin-bottom: 14px; max-width: 240px; }
+    .tk-cta { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; color: #fff; background: var(--grad); border-radius: 11px; padding: 10px 15px; box-shadow: 0 10px 22px -12px rgba(47,107,255,0.9); transition: transform .15s; }
+    .tk-cta:hover { transform: translateY(-1px); }
+
+    /* panels */
+    .tk-panel { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); padding: 15px 16px; }
+    .tk-panel h4 { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.01em; }
+
+    .tk-changes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 15px; }
+    .tk-change { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); }
+    .tk-change .lbl { font-size: 10.5px; color: var(--ink-3); }
+    .tk-change b { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .tk-bar { margin-top: 12px; }
+    .tk-bar .row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 6px; }
+    .tk-bar .row .l { color: var(--pos); font-weight: 600; }
+    .tk-bar .row .r { color: var(--neg); font-weight: 600; }
+    .tk-bar .track { display: flex; gap: 3px; height: 6px; }
+    .tk-bar .track .g { background: var(--pos); border-radius: 2px; transition: width .3s; }
+    .tk-bar .track .s { flex: 1; background: var(--neg); border-radius: 2px; }
+
+    .tk-rows { display: flex; flex-direction: column; }
+    .tk-rows .r { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 12.5px; }
+    .tk-rows .r + .r { border-top: 1px solid var(--line); }
+    .tk-rows .r .k { color: var(--ink-3); flex: none; }
+    .tk-rows .r .fill { flex: 1; border-bottom: 1px dashed var(--line); transform: translateY(-2px); }
+    .tk-rows .r .v { color: #fff; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+    .tk-rows .r .v .dexi { width: 15px; height: 15px; border-radius: 4px; }
+    .tk-rows .r .v.copy { cursor: pointer; }
+    .tk-rows .r .v.copy:hover { color: var(--accent-2); }
+    .tk-rows .r .v svg { width: 13px; height: 13px; }
+
     .sub0 { font-size: 0.72em; vertical-align: -0.15em; opacity: 0.8; }
     .pos { color: var(--pos); } .neg { color: var(--neg); }
-    @media (max-width: 620px) { .tk-price { margin-left: 0; text-align: left; width: 100%; } .tk-chart { height: 70svh; } }
+
+    @media (max-width: 900px) {
+      .tk-grid { grid-template-columns: 1fr; }
+      .tk-chart { height: 62svh; }
+      .tk-metrics { margin-left: 0; width: 100%; }
+    }
+    @media (max-width: 560px) { .tk-metric { min-width: 0; flex: 1; } }
   </style>
 </head>
 <body>
@@ -49,7 +112,10 @@
   <main class="tk">
     <a class="tk-back" href="dex.html">‹ All tokens</a>
     <div class="tk-head" id="tkHead"><div class="tk-id">Loading…</div></div>
-    <div class="tk-chart"><div class="ld" id="tkLoad">Loading chart…</div><iframe id="tkChart" title="Price chart" loading="lazy"></iframe></div>
+    <div class="tk-grid">
+      <div class="tk-chart"><div class="ld" id="tkLoad">Loading chart…</div><iframe id="tkChart" title="Price chart" loading="lazy"></iframe></div>
+      <aside class="tk-side" id="tkSide"></aside>
+    </div>
   </main>
 
   <script src="token.js"></script>

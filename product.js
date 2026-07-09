@@ -185,6 +185,14 @@
     updateDescent();
   });
 
+  /* deep-link: ?q=... (e.g. the "Analyze with ping" banner on a token page) */
+  (function prefill() {
+    const q = new URLSearchParams(location.search).get("q");
+    if (!q) return;
+    input.value = q; resize(); refresh();
+    setTimeout(() => form.requestSubmit(), 60);
+  })();
+
   /* ---------- voice input: record + live transcription ---------- */
   const mic = $("mic"), voice = $("voice"), voiceStop = $("voiceStop"),
     voiceBars = $("voiceBars"), voiceTime = $("voiceTime");
