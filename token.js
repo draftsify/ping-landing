@@ -86,11 +86,7 @@
       const ch = p.priceChange || {};
       const c24 = pct(ch.h24);
       document.title = "$" + sym + " · Ping";
-
-      /* banner (DexScreener header art) */
-      const hero = document.getElementById("tkHero");
-      const banner = p.info && p.info.header;
-      if (hero && banner) { hero.style.backgroundImage = `url("${esc(banner)}")`; hero.hidden = false; }
+      const banner = p.info && p.info.header;   // DexScreener header art → side banner
 
       /* header */
       const socs = socialList(p);
@@ -128,11 +124,14 @@
 
       side.innerHTML =
         `<div class="tk-banner">
-          <img class="bear" src="assets/bear.svg" alt="" onerror="this.style.display='none'">
-          <span class="kicker">ping assistant</span>
-          <h3>What's the story behind $${esc(sym)}?</h3>
-          <p>Get a plain-English breakdown of this coin — the meme, the momentum, and the risk.</p>
-          <a class="tk-cta" href="${askUrl}">Analyze with ping →</a>
+          ${banner
+            ? `<div class="bimg" style="background-image:url('${esc(banner)}')"></div>`
+            : `<img class="bear" src="assets/bear.svg" alt="" onerror="this.style.display='none'">`}
+          <div class="binner">
+            <span class="kicker">ping</span>
+            <h3>What's the story behind $${esc(sym)}?</h3>
+            <a class="tk-cta" href="${askUrl}">Analyze with ping →</a>
+          </div>
         </div>
 
         <div class="tk-panel">
@@ -146,7 +145,7 @@
           </div>
         </div>
 
-        <div class="tk-panel">
+        <div class="tk-panel grow">
           <h4>Token info</h4>
           <div class="tk-rows">
             <div class="r"><span class="k">Exchange</span><span class="fill"></span><span class="v"><img class="dexi" src="${DEX_ICON(p.dexId)}" alt="" onerror="this.style.display='none'">${esc(p.dexId || "—")}</span></div>
