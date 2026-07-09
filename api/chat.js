@@ -191,33 +191,18 @@ async function generate(message, market, tiktok, history) {
   const grounding = groundingText(market, tiktok);
   const user = `User asked:\n"""${message}"""\n\nLIVE DATA:\n${grounding}\n\nGive your read.`;
   const hist = Array.isArray(history) ? history.slice(-6).filter((m) => m && m.role && m.content) : [];
+  const messages = [{ role: "system", content: SYSTEM }, ...hist, { role: "user", content: user }];
 
-  try {
-    if (process.env.XAI_API_KEY) {
-      return await callOpenAICompat({
-        baseURL: "https://api.x.ai/v1", key: process.env.XAI_API_KEY,
-        model: process.env.XAI_MODEL || "grok-4",
-        messages: [{ role: "system", content: SYSTEM }, ...hist, { role: "user", content: user }],
-        search: true,
-      });
-    }
-    if (process.env.OPENAI_API_KEY) {
-      return await callOpenAICompat({
-        baseURL: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1", key: process.env.OPENAI_API_KEY,
-        model: process.env.OPENAI_MODEL || "gpt-4o",
-        messages: [{ role: "system", content: SYSTEM }, ...hist, { role: "user", content: user }],
-      });
-    }
-    if (process.env.ANTHROPIC_API_KEY) {
-      return await callAnthropic({
-        key: process.env.ANTHROPIC_API_KEY, model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5",
-        system: SYSTEM, user,
-      });
-    }
-  } catch (e) {
-    // fall through to rule-based on any LLM failure
+  // try funded providers in order; skip any that error (no credits / bad key) -> rule-based
+  const attempts = [];
+  if (process.env.XAI_API_KEY) attempts.push({ engine: "grok", fn: () => callOpenAICompat({ baseURL: "https://api.x.ai/v1", key: process.env.XAI_API_KEY, model: process.env.XAI_MODEL || "grok-4", messages, search: true }) });
+  if (process.env.OPENAI_API_KEY) attempts.push({ engine: "openai", fn: () => callOpenAICompat({ baseURL: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1", key: process.env.OPENAI_API_KEY, model: process.env.OPENAI_MODEL || "gpt-4o", messages }) });
+  if (process.env.ANTHROPIC_API_KEY) attempts.push({ engine: "anthropic", fn: () => callAnthropic({ key: process.env.ANTHROPIC_API_KEY, model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5", system: SYSTEM, user }) });
+
+  for (const a of attempts) {
+    try { const text = await a.fn(); if (text) return { reply: text, engine: a.engine }; } catch (e) {}
   }
-  return ruleBased(message, market, tiktok);
+  return { reply: ruleBased(message, market, tiktok), engine: "rule-based" };
 }
 
 /* ---------- rule-based, data-grounded fallback ---------- */
@@ -282,16 +267,16 @@ module.exports = async (req, res) => {
   let market = { token: null, trending: [] }, tiktok = null;
   try { [market, tiktok] = await Promise.all([getMarket(message), getTikTok(message)]); } catch (e) {}
 
-  let reply;
-  try { reply = await generate(message, market, tiktok, body.history); }
-  catch (e) { reply = ruleBased(message, market, tiktok); }
-  if (!reply) reply = ruleBased(message, market, tiktok);
+  let result;
+  try { result = await generate(message, market, tiktok, body.history); }
+  catch (e) { result = { reply: ruleBased(message, market, tiktok), engine: "rule-based" }; }
+  if (!result || !result.reply) result = { reply: ruleBased(message, market, tiktok), engine: "rule-based" };
 
   res.statusCode = 200;
   res.setHeader("content-type", "application/json; charset=utf-8");
   res.end(JSON.stringify({
-    reply,
+    reply: result.reply,
     grounded: { token: market.token ? market.token.symbol : null, tiktok: tiktok && !tiktok.error ? tiktok.viralityScore : null },
-    engine: process.env.XAI_API_KEY ? "grok" : process.env.OPENAI_API_KEY ? "openai" : process.env.ANTHROPIC_API_KEY ? "anthropic" : "rule-based",
+    engine: result.engine,
   }));
 };
