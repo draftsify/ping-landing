@@ -95,14 +95,15 @@
         <button class="cx__chip" data-tpl="Break down this narrative and how fast it's spreading:\n\n">Break a narrative</button>
         <button class="cx__chip" data-tpl="What's the momentum on $">Check a ticker</button>
       </div>
-      <div class="cx__opts">
-        <div class="lentoggle" id="cxLen" title="Answer length">
-          <button type="button" class="lenbtn lenbtn--on" data-len="short">Short</button>
-          <button type="button" class="lenbtn" data-len="long">Long</button>
-        </div>
-      </div>
       <form class="cx__box" id="cxForm">
         <textarea id="cxInput" rows="1" placeholder="Ask about a token, a narrative, an X link…"></textarea>
+        <div class="lensel" id="cxLenSel" data-val="short">
+          <button type="button" class="lensel__btn" data-lenbtn aria-label="Answer length"><span data-lenlabel>Short</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div class="lensel__menu" hidden>
+            <button type="button" class="lensel__opt" data-len="short">Short<small>1–2 sentences</small></button>
+            <button type="button" class="lensel__opt" data-len="long">Long<small>full explainer + links</small></button>
+          </div>
+        </div>
         <button type="submit" class="cx__send" id="cxSend" disabled aria-label="Send">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
         </button>

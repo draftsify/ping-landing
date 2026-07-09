@@ -271,12 +271,7 @@
     let greeted = false;
     let convo = [];                   // conversation memory for follow-ups
     let mode = "short";               // answer length: short | long
-    const cxLen = document.getElementById("cxLen");
-    if (cxLen) cxLen.addEventListener("click", (e) => {
-      const b = e.target.closest(".lenbtn"); if (!b) return;
-      mode = b.dataset.len;
-      cxLen.querySelectorAll(".lenbtn").forEach((x) => x.classList.toggle("lenbtn--on", x === b));
-    });
+    if (window.PingChat) PingChat.initLenSelect(document.getElementById("cxLenSel"), (v) => { mode = v; });
 
     const md = (s) => esc(s)
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")

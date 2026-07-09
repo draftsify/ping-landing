@@ -47,11 +47,14 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 11a6 6 0 0 0 12 0"/><path d="M12 17v4"/></svg>
           </button>
           <input type="file" id="file" accept="image/*" multiple hidden />
-          <div class="lentoggle" id="lenToggle" title="Answer length">
-            <button type="button" class="lenbtn lenbtn--on" data-len="short">Short</button>
-            <button type="button" class="lenbtn" data-len="long">Long</button>
-          </div>
           <div class="box__spacer"></div>
+          <div class="lensel" id="lenSel" data-val="short">
+            <button type="button" class="lensel__btn" data-lenbtn aria-label="Answer length"><span data-lenlabel>Short</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div class="lensel__menu" hidden>
+              <button type="button" class="lensel__opt" data-len="short">Short<small>1–2 sentences</small></button>
+              <button type="button" class="lensel__opt" data-len="long">Long<small>full explainer + links</small></button>
+            </div>
+          </div>
           <button type="submit" class="send" id="send" disabled aria-label="Send">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
           </button>

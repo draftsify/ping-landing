@@ -31,11 +31,18 @@
 .pk-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px); background: #fff; color: #0e1117; font-weight: 600; font-size: 13.5px; padding: 10px 16px; border-radius: 12px; box-shadow: 0 16px 40px -16px rgba(0,0,0,0.6); opacity: 0; transition: opacity .3s, transform .3s; z-index: 300; pointer-events: none; }
 .pk-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* short/long length toggle (in the composer) */
-.lentoggle { display: inline-flex; gap: 2px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: 9px; padding: 3px; }
-.lenbtn { font-family: var(--f); font-size: 12px; font-weight: 600; color: var(--ink-3); background: none; border: none; padding: 4px 11px; border-radius: 6px; cursor: pointer; transition: color .15s, background .15s; }
-.lenbtn:hover { color: #fff; }
-.lenbtn--on { background: var(--grad); color: #fff; }
+/* short/long length select — small grey dropdown, Claude-style */
+.lensel { position: relative; }
+.lensel__btn { display: inline-flex; align-items: center; gap: 3px; font-family: var(--f); font-size: 12px; font-weight: 500; color: var(--ink-3); background: none; border: none; padding: 5px 7px; border-radius: 7px; cursor: pointer; transition: color .15s, background .15s; }
+.lensel__btn:hover { color: var(--ink-2); background: rgba(255,255,255,0.06); }
+.lensel__btn svg { width: 11px; height: 11px; opacity: .8; }
+.lensel__menu { position: absolute; bottom: calc(100% + 8px); right: 0; min-width: 130px; background: var(--panel, #12151d); border: 1px solid var(--line-2, rgba(255,255,255,0.16)); border-radius: 11px; padding: 4px; box-shadow: 0 18px 44px -18px rgba(0,0,0,0.75); z-index: 50; animation: pkIn .16s ease; }
+.lensel__menu[hidden] { display: none; }
+.lensel__opt { display: block; width: 100%; text-align: left; font-family: var(--f); font-size: 13px; font-weight: 500; color: var(--ink-2); background: none; border: none; padding: 8px 10px; border-radius: 7px; cursor: pointer; }
+.lensel__opt small { display: block; font-size: 11px; font-weight: 400; color: var(--ink-3); margin-top: 1px; }
+.lensel__opt:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.lensel__opt--on { color: #fff; }
+.lensel__opt--on::after { content: "✓"; float: right; color: var(--accent-2, #5b93ff); font-size: 12px; }
 /* links rendered inside AI messages */
 .msg--ai .body a, .cx__msgs .body a { color: var(--accent-2, #5b93ff); text-decoration: none; border-bottom: 1px solid rgba(91,147,255,0.35); }
 .msg--ai .body a:hover, .cx__msgs .body a:hover { border-bottom-color: var(--accent-2, #5b93ff); }

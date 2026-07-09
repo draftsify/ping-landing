@@ -76,13 +76,8 @@
     .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>')
     .replace(/\n/g, "<br>");
 
-  // short / long answer toggle
-  const lenToggle = document.getElementById("lenToggle");
-  if (lenToggle) lenToggle.addEventListener("click", (e) => {
-    const b = e.target.closest(".lenbtn"); if (!b) return;
-    mode = b.dataset.len;
-    lenToggle.querySelectorAll(".lenbtn").forEach((x) => x.classList.toggle("lenbtn--on", x === b));
-  });
+  // short / long answer selector (Claude-style dropdown)
+  if (window.PingChat) PingChat.initLenSelect(document.getElementById("lenSel"), (v) => { mode = v; });
   const scroll = () => { thread.scrollTop = thread.scrollHeight; updateDescent(); };
 
   function addUser(text) {

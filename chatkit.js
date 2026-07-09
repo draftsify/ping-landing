@@ -105,5 +105,24 @@
     msgBodyEl.appendChild(bar);
   }
 
-  window.PingChat = { attach, openSave, theses: loadTheses };
+  /* ---------- short/long length selector (Claude-style dropdown) ---------- */
+  function initLenSelect(root, onChange) {
+    if (!root) return;
+    const btn = root.querySelector("[data-lenbtn]");
+    const menu = root.querySelector(".lensel__menu");
+    const label = root.querySelector("[data-lenlabel]");
+    if (!btn || !menu) return;
+    function setVal(v) {
+      root.dataset.val = v;
+      if (label) label.textContent = v === "long" ? "Long" : "Short";
+      root.querySelectorAll(".lensel__opt").forEach((o) => o.classList.toggle("lensel__opt--on", o.dataset.len === v));
+      if (onChange) onChange(v);
+    }
+    btn.addEventListener("click", (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; });
+    root.querySelectorAll(".lensel__opt").forEach((o) => o.addEventListener("click", () => { menu.hidden = true; setVal(o.dataset.len); }));
+    document.addEventListener("click", (e) => { if (!root.contains(e.target)) menu.hidden = true; });
+    setVal(root.dataset.val || "short");
+  }
+
+  window.PingChat = { attach, openSave, theses: loadTheses, initLenSelect };
 })();
