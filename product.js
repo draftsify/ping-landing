@@ -146,7 +146,7 @@
     if (!r.ok) throw new Error("bad");
     const d = await r.json();
     if (!d.reply) throw new Error("empty");
-    return d.reply;
+    return { reply: d.reply, sources: d.sources || [] };
   }
 
   form.addEventListener("submit", (e) => {
@@ -166,13 +166,14 @@
     const bodyEl = addAI();
     const bearEl = bodyEl.querySelector(".thinker__bear");
     const started = Date.now();
-    askPing(snap, history).catch(() => review(snap)).then((reply) => {
+    askPing(snap, history).catch(() => ({ reply: review(snap), sources: [] })).then((res) => {
+      const reply = res.reply, sources = res.sources || [];
       const wait = Math.max(0, 1100 - (Date.now() - started));   // keep the thinking bear a beat
       setTimeout(() => {
         if (bearEl) bearEl.classList.add("out");
         setTimeout(() => stream(bodyEl, reply, () => {
           convo.push({ role: "assistant", content: reply });
-          if (window.PingChat) PingChat.attach(bodyEl, reply);
+          if (window.PingChat) PingChat.attach(bodyEl, reply, sources);
         }), 320);
       }, wait);
     });

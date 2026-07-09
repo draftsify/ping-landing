@@ -86,9 +86,55 @@
   function openSave(text) { ensureModal(); ta.value = plain(text); modal.classList.add("open"); setTimeout(() => ta.focus(), 60); }
   function close() { if (modal) modal.classList.remove("open"); }
 
-  /* ---------- public: attach action bar under a message ---------- */
-  function attach(msgBodyEl, text) {
+  /* ---------- sources ("Posts") card + popup ---------- */
+  const escAttr = (s) => String(s || "").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  function srcIcon(type) {
+    if (/x|twitter/i.test(type)) return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2.5h3.3l-7.2 8.2L23.5 21.5h-6.6l-5.2-6.8-6 6.8H2.4l7.7-8.8L1.9 2.5h6.8l4.7 6.2 5.5-6.2zM17.7 19.6h1.8L7.4 4.3H5.5z"/></svg>';
+    if (/telegram/i.test(type)) return svg('<path d="M21.5 4.3L3 11.4c-1 .4-1 1.3 0 1.6l4.6 1.4 1.7 5.4c.2.7.6.8 1.2.3l2.6-2.4 4.5 3.3c.8.5 1.4.2 1.6-.7l3-13.7c.2-1-.4-1.5-1.3-1.3z"/>');
+    if (/site|web/i.test(type)) return svg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/>');
+    if (/chart/i.test(type)) return svg('<path d="M4 20V10M10 20V4M16 20v-7M20.5 20H3"/>');
+    return svg('<path d="M10 14L21 3M15 3h6v6"/>');
+  }
+  function srcLabel(type) {
+    if (/x|twitter/i.test(type)) return "X — posts";
+    if (/telegram/i.test(type)) return "Telegram";
+    if (/site|web/i.test(type)) return "Website";
+    if (/chart/i.test(type)) return "DexScreener chart";
+    return "Link";
+  }
+  const CHEV = '<svg class="srcs__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+  let srcModal;
+  function openSources(sources) {
+    if (!srcModal) {
+      srcModal = document.createElement("div");
+      srcModal.className = "pk-modal";
+      srcModal.innerHTML =
+        `<div class="pk-card"><div class="pk-head"><div><b>Posts &amp; links</b><span>Tap one — it opens the source directly.</span></div>` +
+        `<button class="pk-x" data-x aria-label="Close">${svg(IC.x)}</button></div><div class="pk-body"><div class="src-list"></div></div></div>`;
+      document.body.appendChild(srcModal);
+      srcModal.addEventListener("click", (e) => { if (e.target === srcModal || e.target.closest("[data-x]")) srcModal.classList.remove("open"); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && srcModal.classList.contains("open")) srcModal.classList.remove("open"); });
+    }
+    const list = srcModal.querySelector(".src-list");
+    list.innerHTML = sources.map((s) =>
+      `<button type="button" class="src-row" data-url="${escAttr(s.url)}">` +
+      `<span class="src-ic">${srcIcon(s.type)}</span>` +
+      `<span class="src-meta"><span class="src-t">${escAttr(s.label || srcLabel(s.type))}</span><span class="src-u">${escAttr(s.url)}</span></span>` +
+      `<svg class="src-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14L21 3M15 3h6v6"/></svg></button>`).join("");
+    list.querySelectorAll(".src-row").forEach((r) => r.addEventListener("click", () => { const u = r.dataset.url; if (u) window.open(u, "_blank", "noopener"); }));
+    srcModal.classList.add("open");
+  }
+
+  /* ---------- public: attach sources card + action bar under a message ---------- */
+  function attach(msgBodyEl, text, sources) {
     if (!msgBodyEl || msgBodyEl.querySelector(":scope > .acts")) return;
+    if (Array.isArray(sources) && sources.length) {
+      const card = document.createElement("button");
+      card.type = "button"; card.className = "srcs";
+      card.innerHTML = `<span class="srcs__ic">${srcIcon(sources[0].type)}</span>Posts <span class="srcs__n">${sources.length}</span>${CHEV}`;
+      card.addEventListener("click", () => openSources(sources));
+      msgBodyEl.appendChild(card);
+    }
     const bar = document.createElement("div");
     bar.className = "acts";
     bar.innerHTML =
@@ -124,5 +170,5 @@
     setVal(root.dataset.val || "short");
   }
 
-  window.PingChat = { attach, openSave, theses: loadTheses, initLenSelect };
+  window.PingChat = { attach, openSave, openSources, theses: loadTheses, initLenSelect };
 })();

@@ -2,12 +2,30 @@
    ping · chatkit — per-message actions (copy / listen / save) + save-thesis modal
    shared by the Assistant page and the tokens widget
    ============================================================ */
-.acts { display: flex; gap: 6px; margin-top: 10px; }
-.act { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--line); background: rgba(255,255,255,0.04); color: var(--ink-3); cursor: pointer; transition: color .15s, background .15s; }
-.act:hover { color: #fff; background: rgba(255,255,255,0.09); }
-.act svg { width: 15px; height: 15px; }
-.act.on { color: var(--accent-2, #5b93ff); border-color: rgba(91,147,255,0.4); background: rgba(47,107,255,0.12); }
+.acts { display: flex; gap: 14px; margin-top: 11px; }
+.act { width: 20px; height: 20px; display: grid; place-items: center; border: none; background: none; padding: 0; color: var(--ink-3); cursor: pointer; transition: color .15s, transform .1s; }
+.act:hover { color: #fff; }
+.act:active { transform: scale(.88); }
+.act svg { width: 16px; height: 16px; }
+.act.on { color: var(--accent-2, #5b93ff); }
 .act.ok { color: #35d99a; }
+
+/* Grok-style "Posts" sources card + popup */
+.srcs { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 7px 11px 7px 12px; border: 1px solid var(--line-2, rgba(255,255,255,0.16)); border-radius: 12px; background: rgba(255,255,255,0.04); color: var(--ink); font-family: var(--f); font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s; }
+.srcs:hover { background: rgba(255,255,255,0.08); }
+.srcs__ic { display: inline-flex; }
+.srcs__ic svg { width: 14px; height: 14px; color: var(--ink-2); }
+.srcs__n { color: var(--ink-3); font-weight: 500; }
+.srcs__chev { width: 13px; height: 13px; color: var(--ink-3); }
+.src-list { display: flex; flex-direction: column; gap: 8px; }
+.src-row { display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,0.03); cursor: pointer; transition: background .15s, border-color .15s; text-align: left; }
+.src-row:hover { background: rgba(255,255,255,0.07); border-color: var(--line-2, rgba(255,255,255,0.16)); }
+.src-ic { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; background: rgba(255,255,255,0.06); color: #fff; flex: none; }
+.src-ic svg { width: 16px; height: 16px; }
+.src-meta { min-width: 0; flex: 1; }
+.src-t { font-size: 13.5px; font-weight: 600; color: #fff; }
+.src-u { font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.src-go { width: 15px; height: 15px; color: var(--ink-3); flex: none; }
 
 /* modal */
 .pk-modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(4,6,12,0.62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }

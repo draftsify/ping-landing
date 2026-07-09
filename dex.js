@@ -342,7 +342,7 @@
         body: JSON.stringify({ message: text, history: history || [], mode }),
       });
       if (!r.ok) throw new Error("bad");
-      const d = await r.json(); if (!d.reply) throw new Error("empty"); return d.reply;
+      const d = await r.json(); if (!d.reply) throw new Error("empty"); return { reply: d.reply, sources: d.sources || [] };
     }
     cxForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -354,13 +354,14 @@
       const bodyEl = addAI();
       const bearEl = bodyEl.querySelector(".thinker__bear");
       const started = Date.now();
-      askPing(t, history).catch(() => review(t)).then((reply) => {
+      askPing(t, history).catch(() => ({ reply: review(t), sources: [] })).then((res) => {
+        const reply = res.reply, sources = res.sources || [];
         const wait = Math.max(0, 1000 - (Date.now() - started));
         setTimeout(() => {
           if (bearEl) bearEl.classList.add("out");
           setTimeout(() => stream(bodyEl, reply, () => {
             convo.push({ role: "assistant", content: reply });
-            if (window.PingChat) PingChat.attach(bodyEl, reply);
+            if (window.PingChat) PingChat.attach(bodyEl, reply, sources);
           }), 320);
         }, wait);
       });
