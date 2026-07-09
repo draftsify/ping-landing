@@ -50,7 +50,7 @@ video { display: block; }
 .hero {
   position: relative; z-index: 1; min-height: 100svh;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 96px 24px 80px; max-width: 760px; margin: 0 auto;
+  text-align: center; padding: 96px 24px 96px; max-width: 880px; margin: 0 auto;
 }
 .pill {
   display: inline-flex; align-items: center; gap: 8px; padding: 7px 15px; border-radius: 999px;
@@ -61,12 +61,12 @@ video { display: block; }
 .pill__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--up); box-shadow: 0 0 8px var(--up); animation: blink 1.8s infinite; }
 @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.4;} }
 
-.hero__title { font-weight: 600; font-size: clamp(40px, 7vw, 74px); line-height: 1.02; letter-spacing: -0.035em; text-shadow: 0 2px 40px rgba(9,15,32,0.45); }
+.hero__title { font-weight: 600; font-size: clamp(38px, 6vw, 64px); line-height: 1.06; letter-spacing: -0.035em; text-shadow: 0 2px 40px rgba(9,15,32,0.45); }
 .hero__sub { color: rgba(255,255,255,0.82); font-size: clamp(16px, 2vw, 18.5px); max-width: 540px; margin: 22px auto 0; text-shadow: 0 1px 24px rgba(9,15,32,0.5); }
 
 /* ---------- waitlist ---------- */
 .waitlist {
-  display: flex; gap: 7px; width: 100%; max-width: 448px; margin: 36px auto 0;
+  display: flex; gap: 7px; width: 100%; max-width: 448px; margin: 0 auto;
   padding: 7px; border-radius: 15px;
   background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.26);
   backdrop-filter: blur(14px); box-shadow: 0 20px 50px -24px rgba(0,0,0,0.6);
@@ -98,9 +98,9 @@ video { display: block; }
 .note { font-size: 13.5px; color: rgba(255,255,255,0.66); margin-top: 18px; }
 .note strong { color: #fff; font-weight: 600; }
 
-.join__label { font-size: 13.5px; font-weight: 500; color: rgba(255,255,255,0.74); margin-bottom: 14px; text-shadow: 0 1px 14px rgba(9,15,32,0.5); }
+.join__label { font-size: 13.5px; font-weight: 500; color: rgba(255,255,255,0.74); margin-bottom: 16px; text-shadow: 0 1px 14px rgba(9,15,32,0.5); }
 
-.stores { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 24px; }
+.stores { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 30px; }
 .store { display: inline-flex; border-radius: 9px; overflow: hidden; opacity: .96; box-shadow: 0 8px 22px -12px rgba(0,0,0,0.6); transition: transform .25s ease, opacity .25s ease, box-shadow .25s ease; }
 .store:hover { transform: translateY(-2px); opacity: 1; box-shadow: 0 14px 28px -12px rgba(0,0,0,0.7); }
 .store__svg { display: block; height: 46px; width: auto; border-radius: 9px; }
@@ -118,7 +118,7 @@ video { display: block; }
   .topbar__link { display: none; }
 }
 /* ---------- join → success animation ---------- */
-.join { width: 100%; display: flex; flex-direction: column; align-items: center; transition: opacity .45s ease, transform .45s ease, filter .45s ease; }
+.join { width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: 40px; transition: opacity .45s ease, transform .45s ease, filter .45s ease; }
 .join.gone { opacity: 0; transform: translateY(-10px) scale(.98); filter: blur(4px); pointer-events: none; }
 .waitlist.shake { animation: shake .4s; border-color: rgba(255,130,130,0.7); }
 @keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-7px);} 40%{transform:translateX(6px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(3px);} }
