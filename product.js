@@ -129,6 +129,17 @@
     setTimeout(() => { composerEl.style.transition = ""; }, 640);
   }
 
+  async function askPing(text) {
+    const r = await fetch("/api/chat", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: text }),
+    });
+    if (!r.ok) throw new Error("bad");
+    const d = await r.json();
+    if (!d.reply) throw new Error("empty");
+    return d.reply;
+  }
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const text = input.value.trim();
@@ -141,12 +152,16 @@
     addUser(text);
     const snap = text;
     files = []; renderAtt(); input.value = ""; resize(); refresh();
-    const body = addAI();
-    const bear = body.querySelector(".thinker__bear");
-    setTimeout(() => {
-      if (bear) bear.classList.add("out");
-      setTimeout(() => stream(body, review(snap)), 360);
-    }, 1800);
+    const bodyEl = addAI();
+    const bearEl = bodyEl.querySelector(".thinker__bear");
+    const started = Date.now();
+    askPing(snap).catch(() => review(snap)).then((reply) => {
+      const wait = Math.max(0, 1100 - (Date.now() - started));   // keep the thinking bear a beat
+      setTimeout(() => {
+        if (bearEl) bearEl.classList.add("out");
+        setTimeout(() => stream(bodyEl, reply), 320);
+      }, wait);
+    });
   });
 
   newbtn.addEventListener("click", () => {

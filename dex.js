@@ -329,14 +329,26 @@
       cxInput.value = (c.dataset.tpl || "").replace(/\\n/g, "\n"); resize(); refreshSend(); cxInput.focus();
       cxInput.setSelectionRange(cxInput.value.length, cxInput.value.length);
     });
+    async function askPing(text) {
+      const r = await fetch("/api/chat", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ message: text }),
+      });
+      if (!r.ok) throw new Error("bad");
+      const d = await r.json(); if (!d.reply) throw new Error("empty"); return d.reply;
+    }
     cxForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const t = cxInput.value.trim(); if (!t) return;
       chat.classList.add("chatting");
       addUser(t); cxInput.value = ""; resize(); refreshSend();
-      const body = addAI();
-      const bearEl = body.querySelector(".thinker__bear");
-      setTimeout(() => { if (bearEl) bearEl.classList.add("out"); setTimeout(() => stream(body, review(t)), 340); }, 1700);
+      const bodyEl = addAI();
+      const bearEl = bodyEl.querySelector(".thinker__bear");
+      const started = Date.now();
+      askPing(t).catch(() => review(t)).then((reply) => {
+        const wait = Math.max(0, 1000 - (Date.now() - started));
+        setTimeout(() => { if (bearEl) bearEl.classList.add("out"); setTimeout(() => stream(bodyEl, reply), 320); }, wait);
+      });
     });
   })();
 
