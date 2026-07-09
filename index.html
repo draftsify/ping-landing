@@ -35,21 +35,48 @@
   </header>
 
   <main class="hero">
-    <a href="#" class="pill appear" data-delay="0"><span class="pill__dot"></span> Live signal engine · private beta</a>
-    <h1 class="hero__title appear" data-delay="1">Catch the narrative<br />before the market does.</h1>
-    <p class="hero__sub appear" data-delay="2">
+    <h1 class="hero__title appear" data-delay="0">Catch the narrative<br />before the market does.</h1>
+    <p class="hero__sub appear" data-delay="1">
       A real-time radar for the narratives, memes and cultural signals moving the
       memecoin market. We're opening the private beta in waves.
     </p>
 
-    <form class="waitlist appear" data-delay="3" id="waitform">
-      <input type="email" required placeholder="you@wallet.xyz" aria-label="Email address" />
-      <button type="submit" class="btn"><span class="btn__label">Join waitlist</span><span class="btn__arrow" aria-hidden="true">→</span></button>
-    </form>
-    <p class="note appear" data-delay="4" id="note">No spam, just signal. <strong>2,400+</strong> traders already in line.</p>
+    <div class="join appear" data-delay="2" id="join">
+      <form class="waitlist" id="waitform" novalidate>
+        <input id="wl-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+               placeholder="you@wallet.xyz  ·  or  @handle" aria-label="Email or X handle" enterkeyhint="go" />
+        <button type="submit" class="btn"><span class="btn__label">Join waitlist</span><span class="btn__arrow" aria-hidden="true">→</span></button>
+      </form>
+      <p class="note" id="note">No spam, just signal. <strong>2,400+</strong> traders already in line.</p>
+    </div>
+
+    <div class="success" id="success" hidden>
+      <span class="check" aria-hidden="true">
+        <svg viewBox="0 0 52 52"><circle class="check__c" cx="26" cy="26" r="23" /><path class="check__p" d="M15 27l7.5 7.5L38 19" /></svg>
+      </span>
+      <h2 class="success__title">You're on the list.</h2>
+      <p class="success__sub">We'll ping <span id="success-who">you</span> the moment your invite is ready.</p>
+    </div>
   </main>
 
   <footer class="foot">© 2026 ping · Not financial advice</footer>
+
+  <!-- admin panel -->
+  <div class="admin" id="admin" hidden>
+    <div class="admin__panel">
+      <div class="admin__head">
+        <div class="admin__title"><span class="brand__dot"></span> Waitlist <span class="admin__count" id="admin-count">0</span></div>
+        <button class="admin__close" id="admin-close" aria-label="Close">✕</button>
+      </div>
+      <div class="admin__tools">
+        <input id="admin-search" class="admin__search" placeholder="Search signups…" autocomplete="off" />
+        <button class="admin__act" id="admin-export">Export CSV</button>
+        <button class="admin__act admin__act--danger" id="admin-clear">Clear</button>
+      </div>
+      <div class="admin__list" id="admin-list"></div>
+      <div class="admin__foot" id="admin-foot"></div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
