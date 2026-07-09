@@ -26,7 +26,9 @@
       e.preventDefault();
       const input = form.querySelector("input");
       const label = form.querySelector(".btn__label");
-      if (label) { label.textContent = "You're in ✓"; label.removeAttribute("data-text"); }
+      if (label) label.textContent = "You're in ✓";
+      const arrow = form.querySelector(".btn__arrow");
+      if (arrow) arrow.remove();
       form.querySelector("button").style.pointerEvents = "none";
       input.value = "";
       input.placeholder = "See you on the radar.";
