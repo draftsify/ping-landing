@@ -9,6 +9,7 @@
     chips = $("chips"), newbtn = $("newchat");
   let files = [];
   let convo = [];   // {role, content} conversation memory for follow-ups
+  let mode = "short";  // answer length: short | long
 
   // background descent video — scrubs forward (orbit -> clouds -> city) as the chat grows
   const bgVid = document.getElementById("bgvideo");
@@ -69,7 +70,19 @@
   });
 
   const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
-  const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/_(.+?)_/g, "<em>$1</em>").replace(/\n/g, "<br>");
+  const md = (s) => esc(s)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/_(.+?)_/g, "<em>$1</em>")
+    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>')
+    .replace(/\n/g, "<br>");
+
+  // short / long answer toggle
+  const lenToggle = document.getElementById("lenToggle");
+  if (lenToggle) lenToggle.addEventListener("click", (e) => {
+    const b = e.target.closest(".lenbtn"); if (!b) return;
+    mode = b.dataset.len;
+    lenToggle.querySelectorAll(".lenbtn").forEach((x) => x.classList.toggle("lenbtn--on", x === b));
+  });
   const scroll = () => { thread.scrollTop = thread.scrollHeight; updateDescent(); };
 
   function addUser(text) {
@@ -133,7 +146,7 @@
   async function askPing(text, history) {
     const r = await fetch("/api/chat", {
       method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ message: text, history: history || [] }),
+      body: JSON.stringify({ message: text, history: history || [], mode }),
     });
     if (!r.ok) throw new Error("bad");
     const d = await r.json();

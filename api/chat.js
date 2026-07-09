@@ -144,7 +144,17 @@ Hard rules:
 - Sound like a real person texting — casual, direct, a bit blunt. Example register: "En gros Ansem a hype le coin tôt et sa commu a suivi, c'est ça qui l'a fait pump." or "$CASHCAT c'est parce que Robinhood devait s'appeler Cashcat au début et les fondateurs ont follow le compte."
 - If they ask whether it's worth aping: ONE honest line, say NFA, simple reasoning. No long hedging.
 - Never invent facts or numbers. If you don't know the story, say it in one short line.
+- Use simple, common words. Many readers are NOT native speakers — avoid rare words, complicated sentences, and heavy slang or idioms that are hard to understand.
 - Reply in the user's language. Use the conversation history for follow-ups.`;
+
+const SYSTEM_LONG = `You are ping. Give a clear, COMPLETE explanation of the memecoin, but in SIMPLE, easy words — many readers are NOT native speakers, so avoid rare words, long complicated sentences, and heavy slang.
+
+Write a few short paragraphs, flowing naturally (no rigid headers, no bullet lists):
+1. What it is and where the name / meme comes from — the story, who is behind it, what started it.
+2. Why people are paying attention now — the hype, the community, the TikTok/X buzz.
+3. A short honest take: is it hot or risky right now? Say NFA.
+
+Keep sentences short and easy to read. You may **bold** a couple of key words. Do NOT invent facts, fake founders, or numbers — only use numbers that are in the data provided. Reply in the user's language. Use the conversation history for follow-ups.`;
 
 function groundingText(market, tiktok) {
   const lines = [];
@@ -169,8 +179,8 @@ function groundingText(market, tiktok) {
 }
 
 /* ---------- LLM callers ---------- */
-async function callOpenAICompat({ baseURL, key, model, messages, search }) {
-  const bodyObj = { model, messages, temperature: 0.6, max_tokens: 200 };
+async function callOpenAICompat({ baseURL, key, model, messages, search, maxTokens }) {
+  const bodyObj = { model, messages, temperature: 0.6, max_tokens: maxTokens || 200 };
   if (search) bodyObj.search_parameters = { mode: "auto", sources: [{ type: "x" }, { type: "web" }, { type: "news" }] };
   const r = await fetch(baseURL + "/chat/completions", {
     method: "POST",
@@ -181,33 +191,50 @@ async function callOpenAICompat({ baseURL, key, model, messages, search }) {
   const d = await r.json();
   return d.choices?.[0]?.message?.content?.trim();
 }
-async function callAnthropic({ key, model, system, user }) {
+async function callAnthropic({ key, model, system, user, maxTokens }) {
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-    body: JSON.stringify({ model, max_tokens: 700, system, messages: [{ role: "user", content: user }] }),
+    body: JSON.stringify({ model, max_tokens: maxTokens || 300, system, messages: [{ role: "user", content: user }] }),
   });
   if (!r.ok) throw new Error("Anthropic HTTP " + r.status + " " + (await r.text()).slice(0, 300));
   const d = await r.json();
   return (d.content || []).map((b) => b.text).join("").trim();
 }
 
-async function generate(message, market, tiktok, history) {
+async function generate(message, market, tiktok, history, mode) {
+  const long = mode === "long";
+  const sys = long ? SYSTEM_LONG : SYSTEM;
+  const maxTokens = long ? 850 : 200;
   const grounding = groundingText(market, tiktok);
   const user = `User message:\n"""${message}"""\n\nContext I've gathered:\n${grounding}`;
   const hist = Array.isArray(history) ? history.slice(-6).filter((m) => m && m.role && m.content) : [];
-  const messages = [{ role: "system", content: SYSTEM }, ...hist, { role: "user", content: user }];
+  const messages = [{ role: "system", content: sys }, ...hist, { role: "user", content: user }];
 
   // try funded providers in order; skip any that error (no credits / bad key) -> rule-based
   const attempts = [];
-  if (process.env.XAI_API_KEY) attempts.push({ engine: "grok", fn: () => callOpenAICompat({ baseURL: "https://api.x.ai/v1", key: process.env.XAI_API_KEY, model: process.env.XAI_MODEL || "grok-4.3", messages, search: false }) });
-  if (process.env.OPENAI_API_KEY) attempts.push({ engine: "openai", fn: () => callOpenAICompat({ baseURL: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1", key: process.env.OPENAI_API_KEY, model: process.env.OPENAI_MODEL || "gpt-4o", messages }) });
-  if (process.env.ANTHROPIC_API_KEY) attempts.push({ engine: "anthropic", fn: () => callAnthropic({ key: process.env.ANTHROPIC_API_KEY, model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5", system: SYSTEM, user }) });
+  if (process.env.XAI_API_KEY) attempts.push({ engine: "grok", fn: () => callOpenAICompat({ baseURL: "https://api.x.ai/v1", key: process.env.XAI_API_KEY, model: process.env.XAI_MODEL || "grok-4.3", messages, maxTokens }) });
+  if (process.env.OPENAI_API_KEY) attempts.push({ engine: "openai", fn: () => callOpenAICompat({ baseURL: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1", key: process.env.OPENAI_API_KEY, model: process.env.OPENAI_MODEL || "gpt-4o", messages, maxTokens }) });
+  if (process.env.ANTHROPIC_API_KEY) attempts.push({ engine: "anthropic", fn: () => callAnthropic({ key: process.env.ANTHROPIC_API_KEY, model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5", system: sys, user, maxTokens }) });
 
   for (const a of attempts) {
     try { const text = await a.fn(); if (text) return { reply: text, engine: a.engine }; } catch (e) {}
   }
   return { reply: ruleBased(message, market, tiktok), engine: "rule-based" };
+}
+
+// real official links (X / Telegram / website / chart) from DexScreener — appended in long mode
+function linksBlock(market) {
+  const t = market && market.token;
+  if (!t) return "";
+  const out = [];
+  const x = (t.socials || []).find((s) => /twitter|^x$/i.test(s.type));
+  const tg = (t.socials || []).find((s) => /telegram/i.test(s.type));
+  if (x) out.push("X: " + x.url);
+  if (tg) out.push("Telegram: " + tg.url);
+  if (t.website) out.push("Site: " + t.website);
+  if (t.url) out.push("Chart: " + t.url);
+  return out.length ? "\n\n**Links** — " + out.join("  ·  ") : "";
 }
 
 /* ---------- rule-based, data-grounded fallback ---------- */
@@ -272,10 +299,12 @@ module.exports = async (req, res) => {
   let market = { token: null, trending: [] }, tiktok = null;
   try { [market, tiktok] = await Promise.all([getMarket(message), getTikTok(message)]); } catch (e) {}
 
+  const mode = body.mode === "long" ? "long" : "short";
   let result;
-  try { result = await generate(message, market, tiktok, body.history); }
+  try { result = await generate(message, market, tiktok, body.history, mode); }
   catch (e) { result = { reply: ruleBased(message, market, tiktok), engine: "rule-based" }; }
   if (!result || !result.reply) result = { reply: ruleBased(message, market, tiktok), engine: "rule-based" };
+  if (mode === "long") result.reply += linksBlock(market);   // real X/site/TG/chart links
 
   res.statusCode = 200;
   res.setHeader("content-type", "application/json; charset=utf-8");

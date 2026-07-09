@@ -270,8 +270,19 @@
     chat.hidden = false;              // now driven by the .open class
     let greeted = false;
     let convo = [];                   // conversation memory for follow-ups
+    let mode = "short";               // answer length: short | long
+    const cxLen = document.getElementById("cxLen");
+    if (cxLen) cxLen.addEventListener("click", (e) => {
+      const b = e.target.closest(".lenbtn"); if (!b) return;
+      mode = b.dataset.len;
+      cxLen.querySelectorAll(".lenbtn").forEach((x) => x.classList.toggle("lenbtn--on", x === b));
+    });
 
-    const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/_(.+?)_/g, "<em>$1</em>").replace(/\n/g, "<br>");
+    const md = (s) => esc(s)
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/_(.+?)_/g, "<em>$1</em>")
+      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>')
+      .replace(/\n/g, "<br>");
     const scroll = () => { cxThread.scrollTop = cxThread.scrollHeight; };
 
     function greet() {
@@ -333,7 +344,7 @@
     async function askPing(text, history) {
       const r = await fetch("/api/chat", {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ message: text, history: history || [] }),
+        body: JSON.stringify({ message: text, history: history || [], mode }),
       });
       if (!r.ok) throw new Error("bad");
       const d = await r.json(); if (!d.reply) throw new Error("empty"); return d.reply;
