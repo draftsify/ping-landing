@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ping · thesis desk</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="product.css" />
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><div class="bg__scrim"></div></div>
+
+  <header class="topbar">
+    <a href="index.html" class="brand" aria-label="ping home"><img src="assets/logo-white.png" alt="ping" class="brand__logo" /></a>
+    <div class="topbar__right">
+      <button class="ghost" id="newchat" hidden>New</button>
+      <a href="index.html" class="ghost">Back to site ↗</a>
+    </div>
+  </header>
+
+  <main class="app">
+    <div class="thread" id="thread">
+      <div class="welcome" id="welcome">
+        <span class="badge appear" data-delay="0"><span class="badge__dot"></span> thesis desk · private</span>
+        <h1 class="appear" data-delay="1">Pressure-test your thesis.</h1>
+        <p class="appear" data-delay="2">Paste a narrative, an X post or a chart. ping reads the signal and tells you what it actually sees — momentum, fit, and the risks you're glossing over.</p>
+      </div>
+      <div class="msgs" id="msgs"></div>
+    </div>
+
+    <div class="composer appear" data-delay="3">
+      <form class="box" id="composer">
+        <div class="attachments" id="attachments"></div>
+        <textarea id="input" class="box__input" rows="1" placeholder="Paste your thesis, a narrative, an X link… or attach a chart to analyze."></textarea>
+        <div class="box__bar">
+          <button type="button" class="iconbtn" id="attach" title="Attach image" aria-label="Attach image">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7L10 17.5a1.6 1.6 0 0 1-2.3-2.3l7.8-7.8"/></svg>
+          </button>
+          <input type="file" id="file" accept="image/*" multiple hidden />
+          <div class="box__spacer"></div>
+          <button type="submit" class="send" id="send" disabled aria-label="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </form>
+
+      <div class="chips" id="chips">
+        <button class="chip" data-tpl="Rate my thesis and tell me what I'm missing:\n\n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg>Rate my thesis</button>
+        <button class="chip" data-tpl="Analyze this X post: "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16M20 4L4 20"/></svg>Analyze an X post</button>
+        <button class="chip" data-tpl="Break down this narrative and how fast it's spreading:\n\n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15l5-5 4 4 7-8"/><path d="M16 6h4v4"/></svg>Break down a narrative</button>
+        <button class="chip" data-chart="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 15l3-3 2 2 3-4"/></svg>Read a chart</button>
+        <button class="chip" data-tpl="What's the momentum on $"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l-1 16M14 4l-1 16M4 9h16M3 15h16"/></svg>Check a ticker</button>
+      </div>
+      <p class="disclaimer">Demo — responses are illustrative. Live model &amp; real-time signals coming soon. Not financial advice.</p>
+    </div>
+  </main>
+
+  <script src="product.js"></script>
+</body>
+</html>

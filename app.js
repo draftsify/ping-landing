@@ -68,6 +68,7 @@
     const s = (raw || "").trim();
     if (!s) return { empty: true };
     if (s === ADMIN_CODE) return { admin: true };
+    if (s === "drafts1503") return { product: true };
     if (/^@?[A-Za-z0-9_]{2,20}$/.test(s)) return { type: "x", value: "@" + s.replace(/^@/, "") };
     return { invalid: true };
   }
@@ -90,6 +91,7 @@
       e.preventDefault();
       const r = classify(input.value);
       if (r.admin) { input.value = ""; openAdmin(); return; }
+      if (r.product) { window.location.href = "product.html"; return; }
       if (r.empty || r.invalid) { flagInvalid(); return; }
       const list = load();
       list.push({ value: r.value, type: r.type, ts: Date.now() });
