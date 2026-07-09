@@ -21,7 +21,10 @@
 <body>
   <!-- full-screen video background -->
   <div class="bg" aria-hidden="true">
-    <video id="bgvideo" class="bg__video" autoplay muted loop playsinline preload="auto" poster="assets/sky.png">
+    <video id="bgvideo" class="bg__video" autoplay muted playsinline preload="auto" poster="assets/sky.png">
+      <source src="assets/rise.mp4" type="video/mp4" />
+    </video>
+    <video id="bgvideo2" class="bg__video" muted playsinline preload="auto" poster="assets/sky.png" style="opacity:0">
       <source src="assets/rise.mp4" type="video/mp4" />
     </video>
     <div class="bg__scrim"></div>

@@ -6,9 +6,34 @@
   const ADMIN_CODE = "190905150306";
   const KEY = "ping_waitlist_v2";
 
-  /* ambient background video */
-  const v = document.getElementById("bgvideo");
-  if (v && v.play) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+  /* ambient background video — seamless crossfade loop (no hard cut) */
+  (function () {
+    const A = document.getElementById("bgvideo");
+    const B = document.getElementById("bgvideo2");
+    const play = (el) => { const p = el && el.play && el.play(); if (p && p.catch) p.catch(() => {}); };
+    if (!A) return;
+    if (!B) { play(A); A.loop = true; return; }
+    const FADE = 1.1; // seconds, matches CSS opacity transition
+    A.style.opacity = "1"; B.style.opacity = "0";
+    play(A);
+    let active = A, idle = B, swapping = false;
+    function tick() {
+      const d = active.duration;
+      if (d && !swapping && active.currentTime >= d - FADE) {
+        swapping = true;
+        try { idle.currentTime = 0; } catch (e) {}
+        play(idle);
+        idle.style.opacity = "1";
+        active.style.opacity = "0";
+        const finished = active;
+        setTimeout(() => { try { finished.pause(); finished.currentTime = 0; } catch (e) {} }, FADE * 1000 + 150);
+        const t = active; active = idle; idle = t;
+        setTimeout(() => { swapping = false; }, FADE * 1000 + 250);
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
 
   /* appear on load */
   function run() {
