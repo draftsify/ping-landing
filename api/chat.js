@@ -145,14 +145,22 @@ async function getMarket(message) {
   return out;
 }
 
-/* ---------- TikTok virality (optional) ---------- */
-async function getTikTok(message) {
+/* ---------- TikTok virality (only when it's actually tied to the coin) ---------- */
+async function getTikTok(market, message) {
   const key = process.env.RAPIDAPI_KEY;
   const host = process.env.TIKTOK_RAPIDAPI_HOST; // e.g. tiktok-scraper7.p.rapidapi.com
   if (!key || !host) return null;
-  const kw = ((message.match(/\$([A-Za-z0-9]{2,15})/) || [])[1]) ||
-    ((message.match(/#(\w{2,30})/) || [])[1]) ||
-    (message.split(/\s+/).find((w) => w.length > 3) || "").replace(/[^A-Za-z0-9]/g, "");
+  const t = market && market.token;
+  // don't fabricate a TikTok narrative: only pull it if the coin actually links TikTok,
+  // its description mentions it, or the user explicitly asks about TikTok.
+  const linked = !!t && (
+    (t.socials || []).some((s) => /tiktok/i.test(s.type) || /tiktok/i.test(s.url || "")) ||
+    /tiktok|tik tok/i.test(t.description || "") ||
+    /tiktok|tik tok/i.test(message)
+  );
+  if (!linked) return null;
+  const kwRaw = (t && (t.name || t.symbol)) || (message.match(/\$([A-Za-z0-9]{2,15})/) || [])[1] || "";
+  const kw = String(kwRaw).replace(/[^A-Za-z0-9 ]/g, "").trim();
   if (!kw) return null;
   try {
     const d = await fetchJSON(
@@ -176,6 +184,8 @@ const SYSTEM = `You are Ping, a memecoin analyst who lives on Crypto Twitter. Ex
 - 1–3 short sentences. Lead with the real reason it's moving, plus one concrete detail (who launched or pushed it, where the meme comes from, or a number that actually matters).
 - Use ONLY the real data provided (name, the project's own description, the launch tweet, socials, market stats, TikTok) plus your own knowledge. If something isn't there, say "unclear" — never invent numbers, wallets, founders or names.
 - No filler words, no hype clichés ("community is bullish", "gaining traction", "the meme took off"), no corporate hedging ("it appears", "it seems").
+- If the coin's logo image is attached, look at it: templated/low-effort pump.fun art vs a distinctive piece, and whether it copies a known logo or rides a visible meta — mention it only if it actually matters.
+- Only mention TikTok if TikTok data is present in the context. If it's not there, do NOT bring up TikTok at all.
 - Reply in English. Use the conversation history for follow-ups.`;
 
 const SYSTEM_LONG = `You are Ping, a memecoin analyst who lives on Crypto Twitter. Explain clearly and naturally — like a smart friend who actually did the homework. Not a corporate AI, not a rigid template.
@@ -185,7 +195,9 @@ Write a few short, dense paragraphs (no section headers, no bullet lists, no fil
 - Why it's moving now: who launched or amplified it, the hook, the TikTok/X buzz — tie each point to the real data or things you actually know.
 - A quick honest read on momentum and risk from the market data (mcap vs liquidity, volume, buys vs sells, pair age, distance from ATH) — plain words, but spell out the logic (e.g. "thin liquidity against a big mcap means it dumps fast the second flow stops").
 
-Rules: dense with logic, light on words — every sentence earns its place, no padding. Ground every claim in the data provided or things you genuinely know; if you don't have it, say "unclear" or "no signal yet" — never invent a number, wallet, founder or KOL. No hype clichés ("community is bullish", "gaining traction", "the meme took off"), no corporate hedging, no disclaimers. You may **bold** a few key words. Reply in English. Use the conversation history for follow-ups.`;
+Also, if the coin's logo image is attached, actually LOOK at it: is the art low-effort/templated (generic pump.fun style — weak originality) or distinctive? Does it copy a known logo (e.g. the Solana mark, a big brand, another popular coin) or clearly ride a current visual meta (animal, AI, politics, a platform's look)? Copying a recognizable style can mean it's surfing a trend — say so, and say if it looks like a low-effort ripoff.
+
+Rules: dense with logic, light on words — every sentence earns its place, no padding. Ground every claim in the data provided or things you genuinely know; if you don't have it, say "unclear" or "no signal yet" — never invent a number, wallet, founder or KOL. Only discuss TikTok if TikTok data is actually in the context — otherwise never mention TikTok. No hype clichés ("community is bullish", "gaining traction", "the meme took off"), no corporate hedging, no disclaimers. You may **bold** a few key words. Reply in English. Use the conversation history for follow-ups.`;
 
 function groundingText(market, tiktok) {
   const lines = [];
@@ -222,9 +234,22 @@ function groundingText(market, tiktok) {
 }
 
 /* ---------- LLM callers ---------- */
-async function callOpenAICompat({ baseURL, key, model, messages, search, maxTokens }) {
-  const bodyObj = { model, messages, temperature: 0.6, max_tokens: maxTokens || 200 };
-  if (search) bodyObj.search_parameters = { mode: "auto", sources: [{ type: "x" }, { type: "web" }, { type: "news" }] };
+function cleanImg(u) {
+  if (!u || !/^https?:\/\//.test(u)) return null;
+  return u.includes("cdn.dexscreener.com") ? u.split("?")[0] : u;   // dexscreener 422s with query params
+}
+async function callOpenAICompat({ baseURL, key, model, messages, maxTokens, imageUrl }) {
+  let msgs = messages;
+  if (imageUrl) {   // attach the coin's logo to the last user turn for vision
+    msgs = messages.slice();
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].role === "user") {
+        msgs[i] = { role: "user", content: [{ type: "text", text: msgs[i].content }, { type: "image_url", image_url: { url: imageUrl } }] };
+        break;
+      }
+    }
+  }
+  const bodyObj = { model, messages: msgs, temperature: 0.6, max_tokens: maxTokens || 220 };
   const r = await fetch(baseURL + "/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: "Bearer " + key },
@@ -253,11 +278,14 @@ async function generate(message, market, tiktok, history, mode) {
   const user = `User message:\n"""${message}"""\n\nContext I've gathered:\n${grounding}`;
   const hist = Array.isArray(history) ? history.slice(-6).filter((m) => m && m.role && m.content) : [];
   const messages = [{ role: "system", content: sys }, ...hist, { role: "user", content: user }];
+  const imageUrl = cleanImg(market && market.token && market.token.image);
+  // try with the logo (vision); if that errors, retry the same engine without the image
+  const tryImg = async (fn) => { try { return await fn(imageUrl); } catch (e) { if (imageUrl) return await fn(null); throw e; } };
 
   // try funded providers in order; skip any that error (no credits / bad key) -> rule-based
   const attempts = [];
-  if (process.env.XAI_API_KEY) attempts.push({ engine: "grok", fn: () => callOpenAICompat({ baseURL: "https://api.x.ai/v1", key: process.env.XAI_API_KEY, model: process.env.XAI_MODEL || "grok-4.3", messages, maxTokens }) });
-  if (process.env.OPENAI_API_KEY) attempts.push({ engine: "openai", fn: () => callOpenAICompat({ baseURL: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1", key: process.env.OPENAI_API_KEY, model: process.env.OPENAI_MODEL || "gpt-4o", messages, maxTokens }) });
+  if (process.env.XAI_API_KEY) attempts.push({ engine: "grok", fn: () => tryImg((img) => callOpenAICompat({ baseURL: "https://api.x.ai/v1", key: process.env.XAI_API_KEY, model: process.env.XAI_MODEL || "grok-4.3", messages, maxTokens, imageUrl: img })) });
+  if (process.env.OPENAI_API_KEY) attempts.push({ engine: "openai", fn: () => tryImg((img) => callOpenAICompat({ baseURL: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1", key: process.env.OPENAI_API_KEY, model: process.env.OPENAI_MODEL || "gpt-4o", messages, maxTokens, imageUrl: img })) });
   if (process.env.ANTHROPIC_API_KEY) attempts.push({ engine: "anthropic", fn: () => callAnthropic({ key: process.env.ANTHROPIC_API_KEY, model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5", system: sys, user, maxTokens }) });
 
   for (const a of attempts) {
@@ -341,7 +369,8 @@ module.exports = async (req, res) => {
   if (!message) { res.statusCode = 400; res.setHeader("content-type", "application/json"); return res.end(JSON.stringify({ error: "empty message" })); }
 
   let market = { token: null, trending: [] }, tiktok = null;
-  try { [market, tiktok] = await Promise.all([getMarket(message), getTikTok(message)]); } catch (e) {}
+  try { market = await getMarket(message); } catch (e) {}
+  try { tiktok = await getTikTok(market, message); } catch (e) {}   // only if TikTok is actually tied to the coin
 
   const mode = body.mode === "long" ? "long" : "short";
   let result;
