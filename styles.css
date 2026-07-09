@@ -101,7 +101,7 @@ video { display: block; }
 
 .join__label { font-size: 13.5px; font-weight: 500; color: rgba(255,255,255,0.74); margin-bottom: 14px; }
 
-.stores { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+.stores { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 52px; }
 .store { display: inline-flex; border-radius: 9px; overflow: hidden; opacity: .96; box-shadow: 0 8px 22px -12px rgba(0,0,0,0.6); transition: transform .25s ease, opacity .25s ease, box-shadow .25s ease; }
 .store:hover { transform: translateY(-2px); opacity: 1; box-shadow: 0 14px 28px -12px rgba(0,0,0,0.7); }
 .store__svg { display: block; height: 46px; width: auto; border-radius: 9px; }
