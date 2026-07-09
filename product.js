@@ -19,9 +19,9 @@
       zoomQueued = false;
       if (!bgEl) return;
       const sh = thread.scrollHeight, ch = thread.clientHeight;
-      const content = Math.min(sh / 1000, 1);                       // total chat length
+      const content = Math.min(sh / 1200, 1);                       // total chat length
       const scrolled = Math.min(Math.max(thread.scrollTop / Math.max(sh - ch, 1), 0), 1);
-      const scale = 1 + content * 0.5 + scrolled * 0.18;            // up to ~1.68x
+      const scale = 1 + content * 0.32 + scrolled * 0.1;            // gentle, stays sharp (~1.42x max)
       bgEl.style.transform = "scale(" + scale.toFixed(3) + ")";
     });
   }
