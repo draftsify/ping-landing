@@ -113,12 +113,31 @@
     })();
   }
 
+  const composerEl = document.querySelector(".composer");
+  // FLIP: slide the composer from centre to the bottom on the first message
+  function flipComposer(firstTop) {
+    if (firstTop == null || !composerEl) return;
+    const last = composerEl.getBoundingClientRect().top;
+    const dy = firstTop - last;
+    if (!dy) return;
+    composerEl.style.transition = "none";
+    composerEl.style.transform = `translateY(${dy}px)`;
+    requestAnimationFrame(() => {
+      composerEl.style.transition = "transform .55s cubic-bezier(.2,.7,.2,1)";
+      composerEl.style.transform = "";
+    });
+    setTimeout(() => { composerEl.style.transition = ""; }, 640);
+  }
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const text = input.value.trim();
     if (!text && !files.length) return;
+    const wasChatting = document.body.classList.contains("chatting");
+    const firstTop = wasChatting ? null : (composerEl ? composerEl.getBoundingClientRect().top : null);
     document.body.classList.add("chatting");
     newbtn.hidden = false;
+    if (!wasChatting) flipComposer(firstTop);
     addUser(text);
     const snap = text;
     files = []; renderAtt(); input.value = ""; resize(); refresh();
