@@ -9,6 +9,24 @@
     chips = $("chips"), newbtn = $("newchat");
   let files = [];
 
+  // background planet zoom — grows as the conversation grows
+  const bgEl = document.querySelector(".bg");
+  let zoomQueued = false;
+  function updateZoom() {
+    if (zoomQueued) return;
+    zoomQueued = true;
+    requestAnimationFrame(() => {
+      zoomQueued = false;
+      if (!bgEl) return;
+      const sh = thread.scrollHeight, ch = thread.clientHeight;
+      const content = Math.min(sh / 1000, 1);                       // total chat length
+      const scrolled = Math.min(Math.max(thread.scrollTop / Math.max(sh - ch, 1), 0), 1);
+      const scale = 1 + content * 0.5 + scrolled * 0.18;            // up to ~1.68x
+      bgEl.style.transform = "scale(" + scale.toFixed(3) + ")";
+    });
+  }
+  thread.addEventListener("scroll", updateZoom, { passive: true });
+
   // appear on load
   document.querySelectorAll(".appear").forEach((el) => {
     const d = parseInt(el.dataset.delay || "0", 10);
@@ -42,7 +60,7 @@
 
   const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
   const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/_(.+?)_/g, "<em>$1</em>").replace(/\n/g, "<br>");
-  const scroll = () => { thread.scrollTop = thread.scrollHeight; };
+  const scroll = () => { thread.scrollTop = thread.scrollHeight; updateZoom(); };
 
   function addUser(text) {
     const el = document.createElement("div"); el.className = "msg msg--user";
@@ -106,5 +124,6 @@
   newbtn.addEventListener("click", () => {
     msgs.innerHTML = ""; document.body.classList.remove("chatting"); newbtn.hidden = true;
     input.value = ""; resize(); refresh(); input.focus();
+    if (bgEl) bgEl.style.transform = "scale(1)";
   });
 })();

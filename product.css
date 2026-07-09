@@ -21,10 +21,11 @@ h1 { letter-spacing: -0.03em; font-weight: 600; }
 svg { display: block; }
 
 /* background */
-.bg { position: fixed; inset: 0; z-index: -2; background:
-  radial-gradient(1100px 680px at 50% -12%, rgba(47,107,255,0.20), transparent 60%),
-  radial-gradient(900px 620px at 88% 115%, rgba(123,120,255,0.13), transparent 60%),
-  linear-gradient(180deg, #0e1729 0%, #090e1b 55%, #05070f 100%); }
+.bg { position: fixed; inset: 0; z-index: -3; background: #05070f url("assets/space.jpg") center 42% / cover no-repeat;
+  transform: scale(1); transform-origin: 50% 42%; transition: transform 1.2s cubic-bezier(.2,.7,.2,1); will-change: transform; }
+.bg-scrim { position: fixed; inset: 0; z-index: -2; background:
+  radial-gradient(92% 72% at 50% 26%, rgba(5,7,15,0.10), rgba(5,7,15,0.5) 100%),
+  linear-gradient(180deg, rgba(5,7,15,0.5) 0%, rgba(5,7,15,0.22) 32%, rgba(5,7,15,0.62) 100%); }
 
 /* topbar */
 .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 18px clamp(18px, 4vw, 34px); }
