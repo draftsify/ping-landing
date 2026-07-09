@@ -9,23 +9,31 @@
     chips = $("chips"), newbtn = $("newchat");
   let files = [];
 
-  // background planet zoom — grows as the conversation grows
-  const bgEl = document.querySelector(".bg");
-  let zoomQueued = false;
-  function updateZoom() {
-    if (zoomQueued) return;
-    zoomQueued = true;
-    requestAnimationFrame(() => {
-      zoomQueued = false;
-      if (!bgEl) return;
-      const sh = thread.scrollHeight, ch = thread.clientHeight;
-      const content = Math.min(sh / 1200, 1);                       // total chat length
-      const scrolled = Math.min(Math.max(thread.scrollTop / Math.max(sh - ch, 1), 0), 1);
-      const scale = 1 + content * 0.32 + scrolled * 0.1;            // gentle, stays sharp (~1.42x max)
-      bgEl.style.transform = "scale(" + scale.toFixed(3) + ")";
-    });
+  // background descent video — scrubs forward (orbit -> clouds -> city) as the chat grows
+  const bgVid = document.getElementById("bgvideo");
+  let targetT = 0, curT = 0, rafOn = false;
+  if (bgVid) {
+    bgVid.pause();
+    const prime = () => { try { bgVid.currentTime = 0.001; } catch (e) {} };
+    if (bgVid.readyState >= 1) prime(); else bgVid.addEventListener("loadedmetadata", prime, { once: true });
   }
-  thread.addEventListener("scroll", updateZoom, { passive: true });
+  function descentLoop() {
+    curT += (targetT - curT) * 0.1;
+    if (bgVid && bgVid.readyState >= 1) { try { bgVid.currentTime = curT; } catch (e) {} }
+    if (Math.abs(targetT - curT) > 0.004) requestAnimationFrame(descentLoop);
+    else rafOn = false;
+  }
+  function updateDescent() {
+    if (!bgVid) return;
+    const sh = thread.scrollHeight, ch = thread.clientHeight;
+    const content = Math.min(sh / 2400, 1);
+    const scrolled = Math.min(Math.max(thread.scrollTop / Math.max(sh - ch, 1), 0), 1);
+    const p = Math.min(content * 0.82 + scrolled * 0.18, 1);
+    const dur = (bgVid.duration && isFinite(bgVid.duration)) ? bgVid.duration : 10;
+    targetT = p * (dur - 0.05);
+    if (!rafOn) { rafOn = true; requestAnimationFrame(descentLoop); }
+  }
+  thread.addEventListener("scroll", updateDescent, { passive: true });
 
   // appear on load
   document.querySelectorAll(".appear").forEach((el) => {
@@ -60,7 +68,7 @@
 
   const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
   const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/_(.+?)_/g, "<em>$1</em>").replace(/\n/g, "<br>");
-  const scroll = () => { thread.scrollTop = thread.scrollHeight; updateZoom(); };
+  const scroll = () => { thread.scrollTop = thread.scrollHeight; updateDescent(); };
 
   function addUser(text) {
     const el = document.createElement("div"); el.className = "msg msg--user";
@@ -71,7 +79,7 @@
   }
   function addAI() {
     const el = document.createElement("div"); el.className = "msg msg--ai";
-    el.innerHTML = `<div class="ava"><img src="assets/favicon.png" alt="ping"></div>` +
+    el.innerHTML = `<div class="ava"><img src="assets/logo-white.png" alt="ping"></div>` +
       `<div class="body"><div class="thinker"><div class="thinker__bear"><img src="assets/logo-white.png" alt="">` +
       `<span class="bub b1"></span><span class="bub b2"></span><span class="bub b3"></span></div></div></div>`;
     msgs.appendChild(el); scroll(); return el.querySelector(".body");
@@ -124,6 +132,78 @@
   newbtn.addEventListener("click", () => {
     msgs.innerHTML = ""; document.body.classList.remove("chatting"); newbtn.hidden = true;
     input.value = ""; resize(); refresh(); input.focus();
-    if (bgEl) bgEl.style.transform = "scale(1)";
+    updateDescent();
   });
+
+  /* ---------- voice input: record + live transcription ---------- */
+  const mic = $("mic"), voice = $("voice"), voiceStop = $("voiceStop"),
+    voiceBars = $("voiceBars"), voiceTime = $("voiceTime");
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const PH = input.getAttribute("placeholder");
+  const BARN = 40;
+  const bars = [];
+  if (voiceBars) for (let i = 0; i < BARN; i++) { const s = document.createElement("span"); voiceBars.appendChild(s); bars.push(s); }
+  let recognizing = false, recog = null, media = null, actx = null, analyser = null, barRAF = null, timer = null, secs = 0, baseText = "", finalText = "";
+
+  const fmt = (s) => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  let phTid = null;
+  function flash(msg) { input.setAttribute("placeholder", msg); clearTimeout(phTid); phTid = setTimeout(() => input.setAttribute("placeholder", PH), 2600); }
+
+  async function startRec() {
+    if (recognizing) return;
+    if (!SR) { flash("Voice transcription needs Chrome / a Chromium browser."); return; }
+    try { media = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+    catch (e) { flash("Microphone access denied — enable it to use voice."); return; }
+    recognizing = true;
+    document.body.classList.add("recording"); voice.hidden = false; mic.classList.add("rec");
+    baseText = input.value.trim(); finalText = "";
+    secs = 0; voiceTime.textContent = fmt(0); timer = setInterval(() => { secs++; voiceTime.textContent = fmt(secs); }, 1000);
+
+    // real-time visualizer from mic audio
+    try {
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      const src = actx.createMediaStreamSource(media);
+      analyser = actx.createAnalyser(); analyser.fftSize = 128; analyser.smoothingTimeConstant = 0.78;
+      src.connect(analyser);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      (function draw() {
+        analyser.getByteFrequencyData(data);
+        for (let i = 0; i < BARN; i++) {
+          const v = data[Math.floor((i / BARN) * data.length)] / 255;
+          bars[i].style.height = (8 + v * 92).toFixed(0) + "%";
+        }
+        barRAF = requestAnimationFrame(draw);
+      })();
+    } catch (e) {}
+
+    // transcription
+    recog = new SR(); recog.continuous = true; recog.interimResults = true; recog.lang = navigator.language || "en-US";
+    recog.onresult = (e) => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript;
+      }
+      input.value = ((baseText ? baseText + " " : "") + (finalText + interim)).replace(/\s+/g, " ").replace(/^\s/, "");
+      resize(); refresh();
+    };
+    recog.onerror = (e) => { if (e.error === "not-allowed" || e.error === "service-not-allowed") { flash("Microphone access denied."); stopRec(); } };
+    recog.onend = () => { if (recognizing) { try { recog.start(); } catch (e) {} } };
+    try { recog.start(); } catch (e) {}
+  }
+
+  function stopRec() {
+    if (!recognizing) return;
+    recognizing = false;
+    document.body.classList.remove("recording"); voice.hidden = true; mic.classList.remove("rec");
+    clearInterval(timer);
+    if (barRAF) cancelAnimationFrame(barRAF);
+    if (recog) { recog.onend = null; try { recog.stop(); } catch (e) {} recog = null; }
+    if (actx) { try { actx.close(); } catch (e) {} actx = null; }
+    if (media) { media.getTracks().forEach((t) => t.stop()); media = null; }
+    resize(); refresh(); input.focus();
+  }
+
+  if (mic) mic.addEventListener("click", () => (recognizing ? stopRec() : startRec()));
+  if (voiceStop) voiceStop.addEventListener("click", stopRec);
 })();
