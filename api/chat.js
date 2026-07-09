@@ -60,6 +60,8 @@ function normalizePair(p) {
     chain: p.chainId, dex: p.dexId, address: p.baseToken?.address, url: p.url,
     priceUsd: n(+p.priceUsd), mcap: n(p.marketCap || p.fdv), liq: n(p.liquidity?.usd),
     vol24: n(p.volume?.h24), vol1: n(p.volume?.h1),
+    website: p.info?.websites?.[0]?.url || null,
+    socials: (p.info?.socials || []).map((s) => ({ type: s.type, url: s.url })),
     ch: { m5: n(p.priceChange?.m5), h1: n(p.priceChange?.h1), h6: n(p.priceChange?.h6), h24: n(p.priceChange?.h24) },
     txns24: (p.txns?.h24?.buys || 0) + (p.txns?.h24?.sells || 0),
     buys24: p.txns?.h24?.buys || 0, sells24: p.txns?.h24?.sells || 0,
@@ -133,32 +135,39 @@ async function getTikTok(message) {
 }
 
 /* ---------- prompt ---------- */
-const SYSTEM = `You are ping — a sharp, fast memecoin narrative analyst. Your edge is spotting what will pump BEFORE Crypto Twitter.
-Rules:
-- Momentum & evidence FIRST, opinion second. Be specific and concrete.
-- Ground every claim in the DATA provided (market + TikTok). If data is missing, say so plainly.
-- Weigh narrative virality (TikTok/X trends), liquidity vs market cap, buy/sell flow, pair age, and change velocity across 5m/1h/6h/24h.
-- Cover: (1) Momentum read, (2) Narrative/virality, (3) What they're glossing over / risks, (4) Verdict with a 0–100 conviction and a hard invalidation.
-- Be concise (max ~180 words), use **bold** section labels, no financial-advice fluff. This is signal, not advice.`;
+const SYSTEM = `You are ping — a crypto-native friend who explains WHY a memecoin is popping, to a normal person (a "normie"). You know memecoin culture, Crypto Twitter lore, and internet memes deeply.
+
+When someone asks about a coin (or just pastes a contract address or $ticker), your job is to explain the STORY, not the stats:
+- What's the meme or reference behind it? Where does the name come from?
+- Why are people paying attention right now — the cultural hook, the inside joke, the lore, who's behind it or amplifying it (notable founders, influencers, communities), what event or coincidence kicked it off.
+- What makes it spread and feel "in on the joke".
+
+Example of the depth wanted: for $CASHCAT — explain that "Cashcat" was Robinhood's original working name and that Robinhood's two founders followed the meme's account, which is exactly why degens latched onto it. That kind of concrete backstory is the point.
+
+Style:
+- Talk like you're explaining to a friend over a drink: a few natural sentences or one short paragraph. Warm, sharp, a little witty.
+- NO metrics dumps, NO "conviction 0–100", NO bullet templates, NO price/mcap/liquidity/volume numbers UNLESS the user explicitly asks about the trade or price. They just want to UNDERSTAND the narrative.
+- Lean on your own knowledge of crypto culture plus the links/socials provided. If you genuinely don't know the specific backstory, say so honestly and give your best read of what the name/ticker evokes and the likely angle — never invent fake facts, fake founders, or numbers.
+- Keep it tight (~4–7 sentences). Reply in the user's language (French if they write in French).`;
 
 function groundingText(market, tiktok) {
   const lines = [];
-  if (market?.token) {
-    const t = market.token;
-    lines.push(`MARKET (DexScreener, live) — ${t.symbol}/${t.quote} on ${t.chain}/${t.dex}:
-  price ${t.priceUsd != null ? "$" + t.priceUsd : "n/a"}, mcap ${abbr(t.mcap)}, liquidity ${abbr(t.liq)}, 24h vol ${abbr(t.vol24)}, age ${ageStr(t.ageMs)}
-  change 5m ${pct(t.ch.m5)} · 1h ${pct(t.ch.h1)} · 6h ${pct(t.ch.h6)} · 24h ${pct(t.ch.h24)}
-  24h txns ${t.txns24} (buys ${t.buys24} / sells ${t.sells24}), liq/mcap ${t.liq && t.mcap ? (t.liq / t.mcap * 100).toFixed(1) + "%" : "n/a"}`);
+  const t = market?.token;
+  if (t) {
+    lines.push(`COIN: ${t.name || t.symbol} ($${t.symbol}) — ${t.chain} chain, trading as ${t.symbol}/${t.quote} on ${t.dex}.`);
+    const links = [];
+    if (t.website) links.push("website " + t.website);
+    (t.socials || []).forEach((s) => links.push(`${s.type}: ${s.url}`));
+    if (links.length) lines.push("Official links (use these to figure out the story): " + links.join(" · "));
+    lines.push(`(Market snapshot — ONLY mention if the user asks about the trade/price: mcap ${abbr(t.mcap)}, liquidity ${abbr(t.liq)}, 24h vol ${abbr(t.vol24)}, 24h ${pct(t.ch.h24)}, age ${ageStr(t.ageMs)}.)`);
   } else {
-    lines.push("MARKET: no specific token resolved from the message.");
-  }
-  if (market?.trending?.length) {
-    lines.push("TRENDING NOW (top by 24h vol): " + market.trending.map((t) => `${t.symbol} (${pct(t.ch.h24)}, vol ${abbr(t.vol24)})`).join(", "));
+    lines.push("No specific coin resolved from the message — answer from your own knowledge / ask them for a $ticker or contract.");
   }
   if (tiktok && !tiktok.error) {
-    lines.push(`TIKTOK virality — "${tiktok.keyword}": ${tiktok.posts} recent posts, avg ${tiktok.avgViews?.toLocaleString?.() || tiktok.avgViews} views, virality score ${tiktok.viralityScore}/100.`);
-  } else if (tiktok && tiktok.error) {
-    lines.push(`TIKTOK: lookup unavailable for "${tiktok.keyword}".`);
+    lines.push(`TikTok buzz for "${tiktok.keyword}": ${tiktok.posts} recent posts, virality ${tiktok.viralityScore}/100 — i.e. how much it's spreading beyond Crypto Twitter (${tiktok.viralityScore >= 55 ? "spreading" : "still niche"}).`);
+  }
+  if (market?.trending?.length) {
+    lines.push("For context, coins getting attention right now: " + market.trending.map((x) => x.symbol).join(", ") + ".");
   }
   return lines.join("\n");
 }
@@ -189,7 +198,7 @@ async function callAnthropic({ key, model, system, user }) {
 
 async function generate(message, market, tiktok, history) {
   const grounding = groundingText(market, tiktok);
-  const user = `User asked:\n"""${message}"""\n\nLIVE DATA:\n${grounding}\n\nGive your read.`;
+  const user = `User message:\n"""${message}"""\n\nContext I've gathered:\n${grounding}`;
   const hist = Array.isArray(history) ? history.slice(-6).filter((m) => m && m.role && m.content) : [];
   const messages = [{ role: "system", content: SYSTEM }, ...hist, { role: "user", content: user }];
 
