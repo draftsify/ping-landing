@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ping — Catch the narrative before the market</title>
-  <meta name="description" content="ping tracks the narratives, memes and cultural signals moving the memecoin market in real time — ranked by momentum, so you're positioned before Crypto Twitter catches on." />
+  <meta name="description" content="Real-time radar for the narratives, memes and cultural signals moving the memecoin market. Join the private beta." />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="ping — Catch the narrative before the market" />
-  <meta property="og:description" content="Real-time signal engine for memecoin narratives. Momentum, not follower count." />
+  <meta property="og:description" content="Real-time radar for memecoin narratives. Join the private beta." />
 
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='6' fill='%232f6bff'/%3E%3C/svg%3E" />
 
@@ -21,158 +21,35 @@
 <body>
   <!-- full-screen video background -->
   <div class="bg" aria-hidden="true">
-    <video id="bgvideo" class="bg__video" muted playsinline preload="auto" poster="assets/sky.png">
+    <video id="bgvideo" class="bg__video" autoplay muted loop playsinline preload="auto" poster="assets/sky.png">
       <source src="assets/rise.mp4" type="video/mp4" />
     </video>
-    <div class="bg__veil"></div>
+    <div class="bg__scrim"></div>
   </div>
 
-  <!-- NAV -->
-  <header class="nav" id="nav">
-    <nav class="nav__pill" aria-label="Primary">
-      <a href="#" class="brand" aria-label="ping home">
-        <span class="brand__dot"></span>
-        <span class="brand__name">ping</span>
-      </a>
-      <div class="nav__links">
-        <a href="#signals">Signals</a>
-        <a href="#faq">FAQ</a>
-      </div>
-      <a href="#access" class="btn btn--primary btn--sm"><span class="btn__label" data-text="Get access">Get access</span></a>
-    </nav>
+  <header class="topbar">
+    <a href="#" class="brand" aria-label="ping home">
+      <span class="brand__dot"></span><span class="brand__name">ping</span>
+    </a>
+    <a href="#" class="topbar__link">Follow updates <span aria-hidden="true">↗</span></a>
   </header>
 
-  <main>
-    <!-- HERO -->
-    <section class="hero">
-      <a href="#access" class="pill appear" data-delay="0"><span class="pill__dot"></span> Live signal engine · private beta</a>
-      <h1 class="hero__title appear" data-delay="1">Catch the narrative<br />before the market does.</h1>
-      <p class="hero__sub appear" data-delay="2">
-        ping reads the narratives, memes and cultural signals moving the memecoin
-        market in real time — ranked by momentum, not by follower count.
-      </p>
-      <div class="hero__actions appear" data-delay="3">
-        <a href="#access" class="btn btn--primary btn--lg"><span class="btn__label" data-text="Claim early access">Claim early access</span></a>
-        <a href="#signals" class="btn btn--frost btn--lg"><span class="btn__label" data-text="Explore the engine">Explore the engine</span></a>
-      </div>
-      <div class="hero__proof appear" data-delay="4">
-        <div class="avatars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-        <p><strong>2,400+</strong> traders on the waitlist</p>
-      </div>
-      <span class="scroll-cue appear" data-delay="5" aria-hidden="true"></span>
-    </section>
+  <main class="hero">
+    <a href="#" class="pill appear" data-delay="0"><span class="pill__dot"></span> Live signal engine · private beta</a>
+    <h1 class="hero__title appear" data-delay="1">Catch the narrative<br />before the market does.</h1>
+    <p class="hero__sub appear" data-delay="2">
+      A real-time radar for the narratives, memes and cultural signals moving the
+      memecoin market. We're opening the private beta in waves.
+    </p>
 
-    
-    <!-- SOURCES -->
-    <section class="sources">
-      <p class="sources__label">Listening where culture moves first</p>
-      <div class="sources__row">
-        <span>Crypto Twitter</span><span>Telegram</span><span>TikTok</span>
-        <span>Farcaster</span><span>Discord</span><span>Reddit</span><span>On-chain</span>
-      </div>
-    </section>
-
-    <!-- SIGNALS -->
-    <section class="bento" id="signals">
-      <div class="head">
-        <span class="tag">The engine</span>
-        <h2>What's moving, before it's obvious.</h2>
-        <p>ping watches the feeds, the group chats and on-chain flows all at once, and ranks what's picking up speed — not what already peaked.</p>
-      </div>
-      <div class="bento__grid">
-        <article class="card card--feature reveal">
-          <div class="card__body">
-            <span class="card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.6"/><path d="M12 12 18.4 7.6"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg></span>
-            <h3>Narrative radar</h3>
-            <p>Millions of posts, grouped into the stories forming right now and ranked by how fast they're catching on.</p>
-          </div>
-          <div class="card__viz">
-            <div class="miniradar"><span></span><span></span><span></span><i class="rblip b1"></i><i class="rblip b2"></i><i class="rblip b3"></i></div>
-          </div>
-        </article>
-        <article class="card reveal">
-          <span class="card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.5 8.5 10l3.5 3.5L20 6"/><path d="M15 6h5v5"/></svg></span>
-          <h3>Meme velocity</h3>
-          <p>How fast a meme is spreading across every platform. Speed is the tell — we catch it before the price does.</p>
-        </article>
-        <article class="card reveal">
-          <span class="card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a3.5 3.5 0 0 0 5 0l3-3a3.5 3.5 0 1 0-5-5l-1.6 1.6"/><path d="M14 10a3.5 3.5 0 0 0-5 0l-3 3a3.5 3.5 0 1 0 5 5l1.6-1.6"/></svg></span>
-          <h3>On-chain confirmation</h3>
-          <p>See the moment real wallets start buying the story — culture and flows, read side by side.</p>
-        </article>
-        <article class="card reveal">
-          <span class="card__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5a6 6 0 0 1 12 0c0 4.4 2 5.5 2 5.5H4s2-1.1 2-5.5Z"/><path d="M10.4 19a2 2 0 0 0 3.2 0"/></svg></span>
-          <h3>Alerts, first</h3>
-          <p>Pick a narrative or a ticker and set a line. We ping you the second it breaks — Telegram, Discord or push.</p>
-        </article>
-      </div>
-    </section>
-
-    
-    <!-- STATS -->
-    <section class="stats">
-      <div class="stat"><span class="stat__n" data-count="128411" data-suffix="">0</span><span>Signals / minute</span></div>
-      <div class="stat"><span class="stat__n" data-count="7" data-suffix="">0</span><span>Platforms monitored</span></div>
-      <div class="stat"><span class="stat__n" data-count="2" data-suffix="h">0</span><span>Median lead vs CT</span></div>
-      <div class="stat"><span class="stat__n" data-count="2400" data-suffix="+">0</span><span>On the waitlist</span></div>
-    </section>
-
-    
-    <!-- TICKER -->
-    <section class="ticker-wrap" aria-hidden="true">
-      <div class="ticker">
-        <span>Catch the narrative</span><i>✦</i><span>Catch the narrative</span><i>✦</i>
-        <span>Catch the narrative</span><i>✦</i><span>Catch the narrative</span><i>✦</i>
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section class="faq" id="faq">
-      <div class="faq__list">
-        <details open><summary>Is ping financial advice?<span class="chev"></span></summary><p>No. ping is a research and signal tool. We surface what the internet is talking about and how fast it's moving — the decisions are yours. Always do your own research.</p></details>
-        <details><summary>Which chains do you cover?<span class="chev"></span></summary><p>We launch on Solana and Base, where memecoin culture moves fastest, with more chains rolling out through the beta.</p></details>
-        <details><summary>How is this different from a Twitter list?<span class="chev"></span></summary><p>A list shows what accounts already posted. ping measures momentum across every platform and alerts you while a narrative is still forming — before it reaches your timeline.</p></details>
-        <details><summary>When do I get in?<span class="chev"></span></summary><p>The private beta is live now. We send invites weekly from the waitlist — join to move up the queue.</p></details>
-      </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="cta-wrap" id="access">
-      <div class="cta reveal">
-        <div class="cta__blur" aria-hidden="true"></div>
-        <div class="cta__inner">
-          <span class="pill pill--glass"><span class="pill__dot"></span> 2,400+ waiting · invites weekly</span>
-          <h2>Stop being exit liquidity.</h2>
-          <p>Get early access to ping and read the market while it's still noise.</p>
-          <form class="waitform" id="waitform">
-            <input type="email" required placeholder="you@wallet.xyz" aria-label="Email address" />
-            <button type="submit" class="btn btn--light"><span class="btn__label" data-text="Get access">Get access</span></button>
-          </form>
-          <p class="waitform__note" id="formNote">No spam. Just signal. Unsubscribe anytime.</p>
-        </div>
-      </div>
-    </section>
+    <form class="waitlist appear" data-delay="3" id="waitform">
+      <input type="email" required placeholder="you@wallet.xyz" aria-label="Email address" />
+      <button type="submit" class="btn"><span class="btn__label" data-text="Join waitlist">Join waitlist</span></button>
+    </form>
+    <p class="note appear" data-delay="4" id="note">No spam, just signal. <strong>2,400+</strong> traders already in line.</p>
   </main>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="footer__top">
-      <div class="footer__brand">
-        <a href="#" class="brand"><span class="brand__dot"></span><span class="brand__name">ping</span></a>
-        <p>The signal layer for the memecoin internet. Read the move before the noise.</p>
-      </div>
-      <div class="footer__cols">
-        <div><h5>Product</h5><a href="#signals">Signals</a><a href="#faq">FAQ</a></div>
-        <div><h5>Company</h5><a href="#">About</a><a href="#">Blog</a><a href="#">Careers</a></div>
-        <div><h5>Connect</h5><a href="#">X</a><a href="#">Telegram</a><a href="#">Discord</a></div>
-      </div>
-    </div>
-    <div class="footer__watermark" aria-hidden="true">ping</div>
-    <div class="footer__bottom">
-      <span>© 2026 ping</span>
-      <span>Not financial advice. Trade responsibly.</span>
-    </div>
-  </footer>
+  <footer class="foot">© 2026 ping · Not financial advice</footer>
 
   <script src="app.js"></script>
 </body>
