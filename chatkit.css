@@ -1,0 +1,32 @@
+/* ============================================================
+   ping · chatkit — per-message actions (copy / listen / save) + save-thesis modal
+   shared by the Assistant page and the tokens widget
+   ============================================================ */
+.acts { display: flex; gap: 6px; margin-top: 10px; }
+.act { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--line); background: rgba(255,255,255,0.04); color: var(--ink-3); cursor: pointer; transition: color .15s, background .15s; }
+.act:hover { color: #fff; background: rgba(255,255,255,0.09); }
+.act svg { width: 15px; height: 15px; }
+.act.on { color: var(--accent-2, #5b93ff); border-color: rgba(91,147,255,0.4); background: rgba(47,107,255,0.12); }
+.act.ok { color: #35d99a; }
+
+/* modal */
+.pk-modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(4,6,12,0.62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.pk-modal.open { display: flex; }
+.pk-card { width: min(520px, 94vw); background: var(--panel, #12151d); border: 1px solid var(--line-2, rgba(255,255,255,0.16)); border-radius: 18px; box-shadow: 0 30px 80px -30px rgba(0,0,0,0.85); overflow: hidden; animation: pkIn .26s cubic-bezier(.2,.8,.25,1); }
+@keyframes pkIn { from { opacity: 0; transform: translateY(12px) scale(.98); } }
+.pk-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-bottom: 1px solid var(--line); }
+.pk-head b { font-size: 15px; font-weight: 600; color: #fff; letter-spacing: -0.01em; }
+.pk-head span { display: block; font-size: 12px; color: var(--ink-3); font-weight: 400; margin-top: 2px; }
+.pk-x { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; border: 1px solid var(--line); background: rgba(255,255,255,0.05); color: var(--ink-2); cursor: pointer; transition: all .2s; }
+.pk-x:hover { color: #fff; background: rgba(255,255,255,0.1); }
+.pk-x svg { width: 15px; height: 15px; }
+.pk-body { padding: 16px 18px; }
+.pk-ta { width: 100%; min-height: 150px; max-height: 320px; resize: vertical; background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: 12px; padding: 12px 13px; color: var(--ink); font-family: var(--f); font-size: 14px; line-height: 1.6; outline: none; transition: border-color .2s; }
+.pk-ta:focus { border-color: var(--line-2); }
+.pk-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 0 18px 18px; }
+.pk-btn { font-family: var(--f); font-size: 13.5px; font-weight: 600; padding: 10px 16px; border-radius: 11px; cursor: pointer; border: 1px solid var(--line); background: rgba(255,255,255,0.05); color: var(--ink-2); transition: color .2s, background .2s, transform .1s; }
+.pk-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+.pk-btn:active { transform: scale(.97); }
+.pk-btn--primary { border: none; background: var(--grad); color: #fff; box-shadow: 0 10px 24px -12px rgba(47,107,255,0.9); }
+.pk-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px); background: #fff; color: #0e1117; font-weight: 600; font-size: 13.5px; padding: 10px 16px; border-radius: 12px; box-shadow: 0 16px 40px -16px rgba(0,0,0,0.6); opacity: 0; transition: opacity .3s, transform .3s; z-index: 300; pointer-events: none; }
+.pk-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

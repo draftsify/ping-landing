@@ -8,6 +8,7 @@
     file = $("file"), attWrap = $("attachments"), msgs = $("msgs"), thread = $("thread"),
     chips = $("chips"), newbtn = $("newchat");
   let files = [];
+  let convo = [];   // {role, content} conversation memory for follow-ups
 
   // background descent video — scrubs forward (orbit -> clouds -> city) as the chat grows
   const bgVid = document.getElementById("bgvideo");
@@ -101,11 +102,11 @@
     ].join("\n\n");
   }
 
-  function stream(body, text) {
+  function stream(body, text, onDone) {
     body.dataset.raw = ""; body.innerHTML = "";
     const tokens = text.split(/(\s+)/); let i = 0;
     (function step() {
-      if (i >= tokens.length) return;
+      if (i >= tokens.length) { if (onDone) onDone(); return; }
       body.dataset.raw += tokens.slice(i, i + 3).join(""); i += 3;
       body.innerHTML = md(body.dataset.raw);
       scroll();
@@ -129,10 +130,10 @@
     setTimeout(() => { composerEl.style.transition = ""; }, 640);
   }
 
-  async function askPing(text) {
+  async function askPing(text, history) {
     const r = await fetch("/api/chat", {
       method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify({ message: text, history: history || [] }),
     });
     if (!r.ok) throw new Error("bad");
     const d = await r.json();
@@ -151,21 +152,26 @@
     if (!wasChatting) flipComposer(firstTop);
     addUser(text);
     const snap = text;
+    const history = convo.slice(-8);
+    convo.push({ role: "user", content: snap });
     files = []; renderAtt(); input.value = ""; resize(); refresh();
     const bodyEl = addAI();
     const bearEl = bodyEl.querySelector(".thinker__bear");
     const started = Date.now();
-    askPing(snap).catch(() => review(snap)).then((reply) => {
+    askPing(snap, history).catch(() => review(snap)).then((reply) => {
       const wait = Math.max(0, 1100 - (Date.now() - started));   // keep the thinking bear a beat
       setTimeout(() => {
         if (bearEl) bearEl.classList.add("out");
-        setTimeout(() => stream(bodyEl, reply), 320);
+        setTimeout(() => stream(bodyEl, reply, () => {
+          convo.push({ role: "assistant", content: reply });
+          if (window.PingChat) PingChat.attach(bodyEl, reply);
+        }), 320);
       }, wait);
     });
   });
 
   newbtn.addEventListener("click", () => {
-    msgs.innerHTML = ""; document.body.classList.remove("chatting"); newbtn.hidden = true;
+    msgs.innerHTML = ""; convo = []; document.body.classList.remove("chatting"); newbtn.hidden = true;
     input.value = ""; resize(); refresh(); input.focus();
     updateDescent();
   });

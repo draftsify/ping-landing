@@ -269,6 +269,7 @@
     if (!asst) return;
     chat.hidden = false;              // now driven by the .open class
     let greeted = false;
+    let convo = [];                   // conversation memory for follow-ups
 
     const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/_(.+?)_/g, "<em>$1</em>").replace(/\n/g, "<br>");
     const scroll = () => { cxThread.scrollTop = cxThread.scrollHeight; };
@@ -310,11 +311,11 @@
         `_Demo — a live model wired to real-time ping signals is coming to the beta._`,
       ].join("\n\n");
     }
-    function stream(body, text) {
+    function stream(body, text, onDone) {
       body.dataset.raw = ""; body.innerHTML = "";
       const tk = text.split(/(\s+)/); let i = 0;
       (function step() {
-        if (i >= tk.length) return;
+        if (i >= tk.length) { if (onDone) onDone(); return; }
         body.dataset.raw += tk.slice(i, i + 3).join(""); i += 3;
         body.innerHTML = md(body.dataset.raw); scroll();
         setTimeout(step, 16);
@@ -329,10 +330,10 @@
       cxInput.value = (c.dataset.tpl || "").replace(/\\n/g, "\n"); resize(); refreshSend(); cxInput.focus();
       cxInput.setSelectionRange(cxInput.value.length, cxInput.value.length);
     });
-    async function askPing(text) {
+    async function askPing(text, history) {
       const r = await fetch("/api/chat", {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: text, history: history || [] }),
       });
       if (!r.ok) throw new Error("bad");
       const d = await r.json(); if (!d.reply) throw new Error("empty"); return d.reply;
@@ -342,12 +343,20 @@
       const t = cxInput.value.trim(); if (!t) return;
       chat.classList.add("chatting");
       addUser(t); cxInput.value = ""; resize(); refreshSend();
+      const history = convo.slice(-8);
+      convo.push({ role: "user", content: t });
       const bodyEl = addAI();
       const bearEl = bodyEl.querySelector(".thinker__bear");
       const started = Date.now();
-      askPing(t).catch(() => review(t)).then((reply) => {
+      askPing(t, history).catch(() => review(t)).then((reply) => {
         const wait = Math.max(0, 1000 - (Date.now() - started));
-        setTimeout(() => { if (bearEl) bearEl.classList.add("out"); setTimeout(() => stream(bodyEl, reply), 320); }, wait);
+        setTimeout(() => {
+          if (bearEl) bearEl.classList.add("out");
+          setTimeout(() => stream(bodyEl, reply, () => {
+            convo.push({ role: "assistant", content: reply });
+            if (window.PingChat) PingChat.attach(bodyEl, reply);
+          }), 320);
+        }, wait);
       });
     });
   })();
