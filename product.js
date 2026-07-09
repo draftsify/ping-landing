@@ -53,7 +53,9 @@
   }
   function addAI() {
     const el = document.createElement("div"); el.className = "msg msg--ai";
-    el.innerHTML = `<div class="ava"><img src="assets/favicon.png" alt="ping"></div><div class="body"><div class="typing"><span></span><span></span><span></span></div></div>`;
+    el.innerHTML = `<div class="ava"><img src="assets/favicon.png" alt="ping"></div>` +
+      `<div class="body"><div class="thinker"><div class="thinker__bear"><img src="assets/logo-white.png" alt="">` +
+      `<span class="bub b1"></span><span class="bub b2"></span><span class="bub b3"></span></div></div></div>`;
     msgs.appendChild(el); scroll(); return el.querySelector(".body");
   }
 
@@ -94,7 +96,11 @@
     const snap = text;
     files = []; renderAtt(); input.value = ""; resize(); refresh();
     const body = addAI();
-    setTimeout(() => stream(body, review(snap)), 900 + Math.random() * 500);
+    const bear = body.querySelector(".thinker__bear");
+    setTimeout(() => {
+      if (bear) bear.classList.add("out");
+      setTimeout(() => stream(body, review(snap)), 360);
+    }, 1800);
   });
 
   newbtn.addEventListener("click", () => {
