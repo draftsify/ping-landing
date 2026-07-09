@@ -125,10 +125,10 @@ svg { display: block; }
 .asst__bear::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(91,147,255,0.5), transparent 40%); opacity: 0; transition: opacity .3s; z-index: -1; animation: spin 4s linear infinite; }
 .asst__bear:hover::after { opacity: 1; }
 .asst__bear { overflow: visible; }
-.asst__svg { width: 74%; height: auto; }
-.bear__arm { transform-origin: 84px 76px; animation: armwave 2s ease-in-out infinite; }
-.asst__bear:hover .bear__arm { animation-duration: .85s; }
-@keyframes armwave { 0%,100% { transform: rotate(-4deg); } 25% { transform: rotate(-20deg); } 50% { transform: rotate(2deg); } 75% { transform: rotate(-14deg); } }
+.asst__svg { width: 66%; height: 66%; object-fit: contain; transform-origin: 50% 84%; animation: bidle 5s ease-in-out infinite; }
+.asst__bear:hover .asst__svg { animation: bwave .8s ease-in-out infinite; }
+@keyframes bidle { 0%,100% { transform: rotate(0); } 50% { transform: rotate(3deg); } }
+@keyframes bwave { 0%,100% { transform: rotate(0); } 22% { transform: rotate(-13deg); } 58% { transform: rotate(11deg); } 80% { transform: rotate(-4deg); } }
 @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
 @keyframes wave { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-16deg); } 50% { transform: rotate(14deg); } 80% { transform: rotate(-8deg); } }
 
