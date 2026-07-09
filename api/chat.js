@@ -79,6 +79,33 @@ async function getPumpFun(mint) {
   } catch (e) {}
   return null;
 }
+
+// read the ACTUAL content behind the coin's links (so the AI analyzes it, not a canned description)
+function tweetId(url) { const m = String(url || "").match(/status\/(\d+)/); return m ? m[1] : null; }
+function synToken(id) { return ((Number(id) / 1e15) * Math.PI).toString(36).replace(/(0+|\.)/g, ""); }
+async function readTweet(url) {
+  const id = tweetId(url); if (!id) return null;
+  try {
+    const j = await fetchJSON(`https://cdn.syndication.twimg.com/tweet-result?id=${id}&lang=en&token=${synToken(id)}`, { headers: { "user-agent": "Mozilla/5.0" } }, 7000);
+    if (!j || !j.text) return null;
+    return { author: j.user ? "@" + j.user.screen_name : null, name: j.user?.name || null, followers: j.user?.followers_count ?? null, text: j.text, likes: j.favorite_count ?? null, date: j.created_at || null };
+  } catch (e) { return null; }
+}
+async function readSite(url) {
+  if (!url || !/^https?:\/\//.test(url)) return null;
+  try {
+    const c = new AbortController(); const to = setTimeout(() => c.abort(), 7000);
+    const r = await fetch(url, { signal: c.signal, headers: { "user-agent": "Mozilla/5.0", "accept": "text/html" } });
+    clearTimeout(to);
+    const html = (await r.text()).slice(0, 200000);
+    const title = ((html.match(/<title[^>]*>([^<]*)<\/title>/i) || [])[1] || "").trim();
+    const desc = ((html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)/i) || [])[1]
+      || (html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)/i) || [])[1] || "").trim();
+    const text = html.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 600);
+    if (!title && !desc && !text) return null;
+    return { title, desc, text };
+  } catch (e) { return null; }
+}
 async function getMarket(message) {
   const out = { token: null, trending: [] };
   const addr = (message.match(/\b(0x[a-fA-F0-9]{40}|[1-9A-HJ-NP-Za-km-z]{32,44})\b/) || [])[1];
@@ -142,6 +169,17 @@ async function getMarket(message) {
         .slice(0, 6);
     }
   } catch (e) {}
+
+  // read what's actually behind the coin's links: the launch tweet + the website
+  if (out.token) {
+    const tw = out.token.pumpTweet || (out.token.socials || []).map((s) => s.url).find((u) => /status\/\d+/.test(u || ""));
+    const site = out.token.website || out.token.pfWebsite;
+    try {
+      const [tweet, siteInfo] = await Promise.all([readTweet(tw), readSite(site)]);
+      out.token.tweet = tweet;
+      out.token.site = siteInfo;
+    } catch (e) {}
+  }
   return out;
 }
 
@@ -182,7 +220,7 @@ async function getTikTok(market, message) {
 /* ---------- prompt ---------- */
 const SYSTEM = `You are Ping, a memecoin analyst who lives on Crypto Twitter. Explain like a sharp friend, in plain language.
 - 1–3 short sentences. Lead with the real reason it's moving, plus one concrete detail (who launched or pushed it, where the meme comes from, or a number that actually matters).
-- Use ONLY the real data provided (name, the project's own description, the launch tweet, socials, market stats, TikTok) plus your own knowledge. If something isn't there, say "unclear" — never invent numbers, wallets, founders or names.
+- Analyze the REAL material provided — the coin's NAME, the actual LAUNCH-TWEET TEXT, the WEBSITE content, the LOGO image, and market stats — plus your own knowledge. Read the tweet/site wording; don't just repeat a description. If something isn't there, say "unclear" — never invent numbers, wallets, founders or names.
 - No filler words, no hype clichés ("community is bullish", "gaining traction", "the meme took off"), no corporate hedging ("it appears", "it seems").
 - If the coin's logo image is attached, look at it: templated/low-effort pump.fun art vs a distinctive piece, and whether it copies a known logo or rides a visible meta — mention it only if it actually matters.
 - Only mention TikTok if TikTok data is present in the context. If it's not there, do NOT bring up TikTok at all.
@@ -191,7 +229,7 @@ const SYSTEM = `You are Ping, a memecoin analyst who lives on Crypto Twitter. Ex
 const SYSTEM_LONG = `You are Ping, a memecoin analyst who lives on Crypto Twitter. Explain clearly and naturally — like a smart friend who actually did the homework. Not a corporate AI, not a rigid template.
 
 Write a few short, dense paragraphs (no section headers, no bullet lists, no filler). Flow naturally through:
-- What it is and where the name / meme comes from — use the project's own description, the launch tweet and its socials to nail the real story and who's behind it.
+- What it is and where the name / meme comes from — READ the actual launch-tweet text and the website content provided, look at the logo, and analyze the name itself; use those to nail the real story and who's behind it. Do NOT just parrot a description.
 - Why it's moving now: who launched or amplified it, the hook, the TikTok/X buzz — tie each point to the real data or things you actually know.
 - A quick honest read on momentum and risk from the market data (mcap vs liquidity, volume, buys vs sells, pair age, distance from ATH) — plain words, but spell out the logic (e.g. "thin liquidity against a big mcap means it dumps fast the second flow stops").
 
@@ -203,14 +241,15 @@ function groundingText(market, tiktok) {
   const lines = [];
   const t = market?.token;
   if (t) {
-    lines.push(`COIN: ${t.name || t.symbol} ($${t.symbol}) on ${t.chain}${t.quote ? ` — pair vs ${t.quote}${t.dex ? " on " + t.dex : ""}` : ""}.`);
-    if (t.description) lines.push(`The project's own description: "${String(t.description).slice(0, 500)}"`);
+    lines.push(`COIN: name "${t.name || t.symbol}", ticker $${t.symbol}, on ${t.chain}${t.quote ? ` (pair vs ${t.quote}${t.dex ? " on " + t.dex : ""})` : ""}. Analyze the name itself too.`);
+    if (t.tweet) lines.push(`LAUNCH/ANNOUNCEMENT TWEET (read it and analyze the wording) — by ${t.tweet.author || "?"}${t.tweet.name ? ` (${t.tweet.name})` : ""}${t.tweet.followers != null ? `, ${t.tweet.followers} followers` : ""}${t.tweet.likes != null ? `, ${t.tweet.likes} likes` : ""}: "${String(t.tweet.text).slice(0, 500)}"`);
+    if (t.site) lines.push(`WEBSITE CONTENT (read it) — ${t.site.title || "site"}: "${String(t.site.desc || t.site.text || "").slice(0, 450)}"`);
     const links = [];
-    if (t.pumpTweet) links.push("launch/announcement tweet: " + t.pumpTweet);
+    if (t.pumpTweet) links.push("tweet: " + t.pumpTweet);
     (t.socials || []).forEach((s) => links.push(`${s.type}: ${s.url}`));
     if (t.website || t.pfWebsite) links.push("website: " + (t.website || t.pfWebsite));
     if (t.pfTelegram) links.push("telegram: " + t.pfTelegram);
-    if (links.length) lines.push("Socials & links (real, attached to the coin — use to explain the story): " + links.join(" · "));
+    if (links.length) lines.push("Other links: " + links.join(" · "));
     const mk = [];
     if (t.priceUsd != null) mk.push("price $" + t.priceUsd);
     if (t.mcap) mk.push("mcap " + abbr(t.mcap));
