@@ -26,9 +26,10 @@
   function updateDescent() {
     if (!bgVid) return;
     const sh = thread.scrollHeight, ch = thread.clientHeight;
-    const content = Math.min(sh / 2400, 1);
+    const overflow = Math.max(sh - ch, 0);          // 0 while the chat is empty -> we stay in space
+    const content = Math.min(overflow / 2200, 1);   // every new message pushes the descent further down
     const scrolled = Math.min(Math.max(thread.scrollTop / Math.max(sh - ch, 1), 0), 1);
-    const p = Math.min(content * 0.82 + scrolled * 0.18, 1);
+    const p = Math.min(content * 0.85 + scrolled * 0.15, 1);
     const dur = (bgVid.duration && isFinite(bgVid.duration)) ? bgVid.duration : 10;
     targetT = p * (dur - 0.05);
     if (!rafOn) { rafOn = true; requestAnimationFrame(descentLoop); }
