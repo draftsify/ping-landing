@@ -244,6 +244,102 @@
   searchEl.addEventListener("input", () => { filter = searchEl.value.trim(); render(); });
   refreshBtn.addEventListener("click", () => load(true));
 
+  /* ---------- navbar views ---------- */
+  const VIEW = {
+    trending: { key: "vol", dir: -1 },
+    gainers: { key: "c24", dir: -1 },
+    new: { key: "age", dir: -1 },   // newest first (largest created timestamp)
+    top: { key: "mcap", dir: -1 },
+  };
+  const viewsEl = $("views");
+  if (viewsEl) viewsEl.addEventListener("click", (e) => {
+    const b = e.target.closest(".ntab"); if (!b) return;
+    viewsEl.querySelectorAll(".ntab").forEach((t) => t.classList.remove("ntab--on"));
+    b.classList.add("ntab--on");
+    sort = Object.assign({}, VIEW[b.dataset.view] || VIEW.trending);
+    headEl.querySelectorAll(".th").forEach((el) => { el.classList.remove("sorted"); const a = el.querySelector(".arrow"); if (a) a.remove(); });
+    render();
+  });
+
+  /* ---------- floating bear assistant + chat ---------- */
+  (function () {
+    const asst = $("asst"), bear = $("asstBear"), closeBtn = $("asstClose"), chat = $("asstChat");
+    const cxMsgs = $("cxMsgs"), cxThread = $("cxThread"), cxForm = $("cxForm"),
+      cxInput = $("cxInput"), cxSend = $("cxSend"), cxChips = $("cxChips");
+    if (!asst) return;
+    chat.hidden = false;              // now driven by the .open class
+    let greeted = false;
+
+    const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/_(.+?)_/g, "<em>$1</em>").replace(/\n/g, "<br>");
+    const scroll = () => { cxThread.scrollTop = cxThread.scrollHeight; };
+
+    function greet() {
+      const el = document.createElement("div");
+      el.className = "cx__greet";
+      el.innerHTML = "<b>Hey, I'm ping 🐻</b>Paste a thesis, a narrative or an X link and I'll tell you what's actually moving — before CT.";
+      cxMsgs.appendChild(el);
+    }
+    function openChat() { asst.classList.add("open"); if (!greeted) { greet(); greeted = true; } setTimeout(() => cxInput.focus(), 260); }
+    function closeChat() { asst.classList.remove("open"); }
+    bear.addEventListener("click", openChat);
+    closeBtn.addEventListener("click", closeChat);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && asst.classList.contains("open")) closeChat(); });
+
+    function addUser(t) {
+      const g = cxMsgs.querySelector(".cx__greet"); if (g) g.remove();
+      const el = document.createElement("div"); el.className = "msg msg--user";
+      el.innerHTML = `<div class="bubble">${esc(t)}</div>`;
+      cxMsgs.appendChild(el); scroll();
+    }
+    function addAI() {
+      const el = document.createElement("div"); el.className = "msg msg--ai";
+      el.innerHTML = `<div class="ava"><img src="assets/logo-white.png" alt=""></div>` +
+        `<div class="body"><div class="thinker"><div class="thinker__bear"><img src="assets/logo-white.png" alt="">` +
+        `<span class="bub b1"></span><span class="bub b2"></span><span class="bub b3"></span></div></div></div>`;
+      cxMsgs.appendChild(el); scroll(); return el.querySelector(".body");
+    }
+    function review(text) {
+      const ticker = (text.match(/\$[A-Za-z0-9]{2,10}/) || [])[0];
+      const subj = ticker || "this";
+      const score = 62 + Math.floor(Math.random() * 30);
+      return [
+        `**Read on ${subj}.** Momentum first, opinion second.`,
+        `**Momentum** — chatter is building but still early. Velocity is positive on CT & Telegram, thinner on TikTok. Reads _forming_, not _peaked_.`,
+        `**What you're glossing over** — mentions are concentrated in a handful of accounts and there's no fresh-wallet confirmation on-chain yet. Loud but shallow is still noise.`,
+        `**Verdict** — conviction ${score}/100. Worth a starter watch with a hard invalidation if velocity flattens over the next few hours.`,
+        `_Demo — a live model wired to real-time ping signals is coming to the beta._`,
+      ].join("\n\n");
+    }
+    function stream(body, text) {
+      body.dataset.raw = ""; body.innerHTML = "";
+      const tk = text.split(/(\s+)/); let i = 0;
+      (function step() {
+        if (i >= tk.length) return;
+        body.dataset.raw += tk.slice(i, i + 3).join(""); i += 3;
+        body.innerHTML = md(body.dataset.raw); scroll();
+        setTimeout(step, 16);
+      })();
+    }
+    const resize = () => { cxInput.style.height = "auto"; cxInput.style.height = Math.min(cxInput.scrollHeight, 120) + "px"; };
+    const refreshSend = () => { cxSend.disabled = !cxInput.value.trim(); };
+    cxInput.addEventListener("input", () => { resize(); refreshSend(); });
+    cxInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); cxForm.requestSubmit(); } });
+    cxChips.addEventListener("click", (e) => {
+      const c = e.target.closest(".cx__chip"); if (!c) return;
+      cxInput.value = (c.dataset.tpl || "").replace(/\\n/g, "\n"); resize(); refreshSend(); cxInput.focus();
+      cxInput.setSelectionRange(cxInput.value.length, cxInput.value.length);
+    });
+    cxForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const t = cxInput.value.trim(); if (!t) return;
+      chat.classList.add("chatting");
+      addUser(t); cxInput.value = ""; resize(); refreshSend();
+      const body = addAI();
+      const bearEl = body.querySelector(".thinker__bear");
+      setTimeout(() => { if (bearEl) bearEl.classList.add("out"); setTimeout(() => stream(body, review(t)), 340); }, 1700);
+    });
+  })();
+
   load();
   setInterval(() => load(false), 45000);
 })();

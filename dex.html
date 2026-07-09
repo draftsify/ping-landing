@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ping · trading</title>
+  <title>ping · tokens</title>
   <meta name="robots" content="noindex" />
   <link rel="icon" type="image/png" href="assets/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -12,37 +12,30 @@
   <link rel="stylesheet" href="dex.css" />
 </head>
 <body>
-  <div class="bg-scrim" aria-hidden="true"></div>
-
-  <header class="topbar">
-    <a href="index.html" class="brand" aria-label="ping home"><img src="assets/logo-white.png" alt="ping" class="brand__logo" /></a>
-    <nav class="tabs">
-      <a href="product.html" class="tab">AI</a>
-      <a href="dex.html" class="tab tab--active">Trading</a>
+  <header class="nav">
+    <a class="nav__brand" href="index.html" aria-label="ping home">
+      <img class="nav__logo" src="assets/logo-white.png" alt="" />
+      <span>ping</span>
+    </a>
+    <nav class="nav__tabs" id="views">
+      <button class="ntab ntab--on" data-view="trending">Trending</button>
+      <button class="ntab" data-view="gainers">Gainers</button>
+      <button class="ntab" data-view="new">New</button>
+      <button class="ntab" data-view="top">Top</button>
     </nav>
-    <div class="topbar__right">
-      <div class="live"><span class="live__dot"></span>Live</div>
-      <a href="index.html" class="ghost">Back to site ↗</a>
+    <div class="nav__right">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="search" type="text" placeholder="Search token, symbol, chain…" autocomplete="off" />
+      </div>
+      <button class="iconbtn" id="refresh" title="Refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      </button>
+      <a class="ghost" href="index.html">Back to site ↗</a>
     </div>
   </header>
 
   <main class="page">
-    <div class="page__head">
-      <div>
-        <h1>Trading</h1>
-        <p class="sub">Live pairs across chains — trending &amp; boosted, ranked by volume.</p>
-      </div>
-      <div class="toolbar">
-        <div class="search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input id="search" type="text" placeholder="Filter by name, symbol or chain…" autocomplete="off" />
-        </div>
-        <button class="refresh" id="refresh" title="Refresh">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
-        </button>
-      </div>
-    </div>
-
     <div class="dex-scroll">
       <div class="dex">
         <div class="dex-head" id="dexHead">
@@ -69,6 +62,40 @@
     </div>
     <p class="foot" id="foot"></p>
   </main>
+
+  <!-- floating AI assistant -->
+  <div class="asst" id="asst">
+    <div class="asst__bubble" id="asstHi">coucou&nbsp;<span class="asst__hand">👋</span></div>
+    <button class="asst__bear" id="asstBear" aria-label="Ask ping AI">
+      <video src="assets/bear.mp4" poster="assets/bear.png" autoplay loop muted playsinline></video>
+    </button>
+
+    <section class="cx" id="asstChat" hidden aria-label="ping AI chat">
+      <div class="cx__head">
+        <div class="cx__id">
+          <span class="cx__ava"><img src="assets/bear.png" alt="" /></span>
+          <div><b>ping</b><em>thesis desk</em></div>
+        </div>
+        <button class="cx__close" id="asstClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div class="cx__thread" id="cxThread">
+        <div class="cx__msgs" id="cxMsgs"></div>
+      </div>
+      <div class="cx__chips" id="cxChips">
+        <button class="cx__chip" data-tpl="Rate my thesis and tell me what I'm missing:\n\n">Rate my thesis</button>
+        <button class="cx__chip" data-tpl="Break down this narrative and how fast it's spreading:\n\n">Break a narrative</button>
+        <button class="cx__chip" data-tpl="What's the momentum on $">Check a ticker</button>
+      </div>
+      <form class="cx__box" id="cxForm">
+        <textarea id="cxInput" rows="1" placeholder="Ask about a token, a narrative, an X link…"></textarea>
+        <button type="submit" class="cx__send" id="cxSend" disabled aria-label="Send">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+        </button>
+      </form>
+    </section>
+  </div>
 
   <script src="dex.js"></script>
 </body>
