@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ping</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="dex.css" />
+  <style>
+    .tk { max-width: 1500px; margin: 0 auto; padding: 14px clamp(14px, 3vw, 26px) 22px; }
+    .tk-back { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-2); font-size: 13px; font-weight: 500; margin: 4px 0 12px; }
+    .tk-back:hover { color: #fff; }
+    .tk-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 13px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 12px; }
+    .tk-id { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .tk-id .logo { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: #1a2030; object-fit: cover; flex: none; }
+    .tk-sym { font-size: 19px; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
+    .tk-sym span { color: var(--ink-3); font-weight: 500; font-size: 15px; }
+    .tk-name { font-size: 12.5px; color: var(--ink-3); display: flex; align-items: center; gap: 7px; margin-top: 2px; }
+    .tk-name img { width: 15px; height: 15px; border-radius: 4px; }
+    .tk-price { margin-left: auto; text-align: right; }
+    .tk-price .p { font-size: 22px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+    .tk-price .c { font-size: 14px; font-weight: 600; }
+    .tk-stats { display: flex; gap: 9px; flex-wrap: wrap; }
+    .tk-stat { background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 10px; padding: 7px 12px; }
+    .tk-stat b { display: block; font-size: 14px; color: #fff; font-variant-numeric: tabular-nums; }
+    .tk-stat span { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; }
+    .tk-chart { position: relative; height: calc(100svh - 250px); min-height: 400px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--panel); }
+    .tk-chart iframe { width: 100%; height: 100%; border: 0; display: block; }
+    .tk-chart .ld { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-3); font-size: 13px; }
+    .sub0 { font-size: 0.72em; vertical-align: -0.15em; opacity: 0.8; }
+    .pos { color: var(--pos); } .neg { color: var(--neg); }
+    @media (max-width: 620px) { .tk-price { margin-left: 0; text-align: left; width: 100%; } .tk-chart { height: 70svh; } }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <a class="nav__brand" href="index.html" aria-label="ping home"><img class="nav__logo" src="assets/logo-white.png" alt="" /><span>ping</span></a>
+    <nav class="nav__main">
+      <a class="mtab" href="product.html">Assistant</a>
+      <a class="mtab mtab--on" href="dex.html">Tokens</a>
+    </nav>
+    <div class="nav__right"><a class="ghost" href="dex.html">Back to site ↗</a></div>
+  </header>
+
+  <main class="tk">
+    <a class="tk-back" href="dex.html">‹ All tokens</a>
+    <div class="tk-head" id="tkHead"><div class="tk-id">Loading…</div></div>
+    <div class="tk-chart"><div class="ld" id="tkLoad">Loading chart…</div><iframe id="tkChart" title="Price chart" loading="lazy"></iframe></div>
+  </main>
+
+  <script src="token.js"></script>
+</body>
+</html>

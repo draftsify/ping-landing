@@ -181,7 +181,7 @@
       const tokImg = r.icon
         ? `<img class="tok" src="${esc(r.icon)}" loading="lazy" alt="" onerror="this.style.visibility='hidden'">`
         : `<div class="tok"></div>`;
-      return `<div class="dex-row" data-url="${esc(r.url)}">
+      return `<div class="dex-row" data-url="${esc(r.url)}" data-chain="${esc(r.chainId)}" data-pair="${esc(r.pairAddress)}">
         <div class="cell c-token">
           <span class="rank">#${i + 1}</span>
           <div class="icons">
@@ -215,11 +215,13 @@
     }).join("");
   }
 
-  // open the pair on DexScreener when a row (but not a social link) is clicked
+  // clicking a row opens our in-app chart page (social links still open normally)
   rowsEl.addEventListener("click", (e) => {
     if (e.target.closest(".socials")) return;
-    const row = e.target.closest(".dex-row");
-    if (row && row.dataset.url) window.open(row.dataset.url, "_blank", "noopener");
+    const row = e.target.closest(".dex-row"); if (!row) return;
+    const chain = row.dataset.chain, pair = row.dataset.pair;
+    if (chain && pair) location.href = `token.html?chain=${encodeURIComponent(chain)}&pair=${encodeURIComponent(pair)}`;
+    else if (row.dataset.url) window.open(row.dataset.url, "_blank", "noopener");
   });
 
   /* ---------- sort headers ---------- */
