@@ -4,7 +4,7 @@
 (function () {
   "use strict";
   const ADMIN_CODE = "190905150306";
-  const KEY = "ping_waitlist_v1";
+  const KEY = "ping_waitlist_v2";
 
   /* ambient background video */
   const v = document.getElementById("bgvideo");
@@ -29,11 +29,11 @@
     const now = Date.now(), M = 60000, H = 3600000;
     save([
       { value: "@0xgigachad", type: "x", ts: now - 2 * M },
-      { value: "degen@wallet.wtf", type: "email", ts: now - 26 * M },
+      { value: "@degenmike", type: "x", ts: now - 26 * M },
       { value: "@solmaxi", type: "x", ts: now - 3 * H },
-      { value: "anon@proton.me", type: "email", ts: now - 5 * H },
+      { value: "@anoncap", type: "x", ts: now - 5 * H },
       { value: "@memecoinmom", type: "x", ts: now - 9 * H },
-      { value: "trader@ct.xyz", type: "email", ts: now - 27 * H },
+      { value: "@ctdrifter", type: "x", ts: now - 27 * H },
       { value: "@basedjeet", type: "x", ts: now - 49 * H },
     ]);
   }
@@ -43,7 +43,6 @@
     const s = (raw || "").trim();
     if (!s) return { empty: true };
     if (s === ADMIN_CODE) return { admin: true };
-    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) return { type: "email", value: s.toLowerCase() };
     if (/^@?[A-Za-z0-9_]{2,20}$/.test(s)) return { type: "x", value: "@" + s.replace(/^@/, "") };
     return { invalid: true };
   }
@@ -57,7 +56,7 @@
 
   function flagInvalid() {
     form.classList.remove("shake"); void form.offsetWidth; form.classList.add("shake");
-    input.setAttribute("placeholder", "enter an email or an @handle");
+    input.setAttribute("placeholder", "enter your @handle");
     input.focus();
   }
 
