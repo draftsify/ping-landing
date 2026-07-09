@@ -81,7 +81,8 @@ async function getMarket(message) {
       if (!pairs.length) pairs = d.pairs || [];
     }
     if (pairs.length) {
-      pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0));
+      // prefer the actively-traded pair (24h volume), tiebreak on liquidity
+      pairs.sort((a, b) => ((b.volume?.h24 || 0) - (a.volume?.h24 || 0)) || ((b.liquidity?.usd || 0) - (a.liquidity?.usd || 0)));
       out.token = normalizePair(pairs[0]);
     }
   } catch (e) {}
